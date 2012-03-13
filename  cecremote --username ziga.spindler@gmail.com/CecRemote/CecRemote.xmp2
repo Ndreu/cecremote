@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PackageClass xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Version>2.0</Version>
+  <Groups>
+    <Items>
+      <GroupItem Name="Default">
+        <ParentGroup />
+        <DisplayName>Default</DisplayName>
+        <DefaulChecked>true</DefaulChecked>
+        <Description>Default</Description>
+        <Files>
+          <Items>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>CecRemote\bin\Debug\CecRemote.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{c489b589-09e0-4824-b2a9-e57f5dac26cc}-CecRemote.dll</ZipFileName>
+              <DestinationFilename>%Plugins%\process\CecRemote.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>CecRemote\bin\Debug\libcec.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{44a5f835-81af-499c-a9ba-2fba5b953864}-libcec.dll</ZipFileName>
+              <DestinationFilename>%Plugins%\process\libcec.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>CecRemote\bin\Debug\LibCecSharp.dll</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{dd9ea537-7dba-4bb2-80e7-7c090a391397}-LibCecSharp.dll</ZipFileName>
+              <DestinationFilename>%Plugins%\process\LibCecSharp.dll</DestinationFilename>
+            </FileItem>
+            <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+              <Param1 />
+              <UpdateOption>OverwriteIfOlder</UpdateOption>
+              <LocalFileName>CecRemote\CecRemote.xml</LocalFileName>
+              <ZipFileName>Installer{CopyFile}\{9ff7d7bf-8634-41c8-934d-d7d8aac6dc82}-CecRemote.xml</ZipFileName>
+              <DestinationFilename>%Base%\defaults\InputDeviceMappings\CecRemote.xml</DestinationFilename>
+            </FileItem>
+          </Items>
+        </Files>
+      </GroupItem>
+    </Items>
+  </Groups>
+  <Sections>
+    <Items>
+      <SectionItem Guid="d0178547-e056-4045-ad52-586377c69f42" Name="Welcome Screen" ConditionGroup="">
+        <Params>
+          <Items>
+            <SectionParam Name="Header text">
+              <Value>Welcome to the Extension Installer for [Name]</Value>
+              <ValueType>String</ValueType>
+              <Description />
+            </SectionParam>
+            <SectionParam Name="Description">
+              <Value>This will install [Name] version [Version] on your computer.
+It is recommended that you close all other applications before continuing.
+Click Next to continue or Cancel to exit Setup.</Value>
+              <ValueType>String</ValueType>
+              <Description />
+            </SectionParam>
+            <SectionParam Name="Left part image">
+              <Value />
+              <ValueType>File</ValueType>
+              <Description />
+            </SectionParam>
+            <SectionParam Name="Header image">
+              <Value />
+              <ValueType>File</ValueType>
+              <Description>Image in upper right part</Description>
+            </SectionParam>
+          </Items>
+        </Params>
+        <Actions>
+          <Items />
+        </Actions>
+        <IncludedGroups />
+        <PanelName>Welcome Screen</PanelName>
+        <WizardButtonsEnum>NextCancel</WizardButtonsEnum>
+      </SectionItem>
+      <SectionItem Guid="aac212f4-0a7f-4464-adb3-fff6cd8d9c9a" Name="Install Section" ConditionGroup="">
+        <Params>
+          <Items>
+            <SectionParam Name="Header Title">
+              <Value />
+              <ValueType>String</ValueType>
+              <Description>Header title</Description>
+            </SectionParam>
+            <SectionParam Name="Header description">
+              <Value />
+              <ValueType>String</ValueType>
+              <Description>Description of section, shown in under section title</Description>
+            </SectionParam>
+            <SectionParam Name="Header image">
+              <Value />
+              <ValueType>File</ValueType>
+              <Description>Image in upper right part</Description>
+            </SectionParam>
+          </Items>
+        </Params>
+        <Actions>
+          <Items>
+            <ActionItem Name="InstallFiles" ActionType="InstallFiles" ConditionGroup="">
+              <Params>
+                <Items />
+              </Params>
+              <ExecuteLocation>AfterPanelShow</ExecuteLocation>
+            </ActionItem>
+          </Items>
+        </Actions>
+        <IncludedGroups />
+        <PanelName>Install Section</PanelName>
+        <WizardButtonsEnum>Next</WizardButtonsEnum>
+      </SectionItem>
+      <SectionItem Guid="eea80a13-26c1-4354-93a2-c6911e2d9211" Name="Setup Complete" ConditionGroup="">
+        <Params>
+          <Items>
+            <SectionParam Name="Header text">
+              <Value>The Extension Installer Wizard has successfully installed [Name].</Value>
+              <ValueType>String</ValueType>
+              <Description />
+            </SectionParam>
+            <SectionParam Name="Left part image">
+              <Value />
+              <ValueType>File</ValueType>
+              <Description />
+            </SectionParam>
+            <SectionParam Name="Show radio buttons">
+              <Value />
+              <ValueType>Bool</ValueType>
+              <Description>Use radiobutton in place of combobox</Description>
+            </SectionParam>
+            <SectionParam Name="Header image">
+              <Value />
+              <ValueType>File</ValueType>
+              <Description>Image in upper right part</Description>
+            </SectionParam>
+          </Items>
+        </Params>
+        <Actions>
+          <Items />
+        </Actions>
+        <IncludedGroups />
+        <PanelName>Setup Complete</PanelName>
+        <WizardButtonsEnum>Finish</WizardButtonsEnum>
+      </SectionItem>
+    </Items>
+  </Sections>
+  <Dependencies>
+    <Items>
+      <DependencyItem>
+        <Type>MediaPortal</Type>
+        <Id />
+        <MinVersion>
+          <Major>1</Major>
+          <Minor>1</Minor>
+          <Build>6</Build>
+          <Revision>27644</Revision>
+        </MinVersion>
+        <MaxVersion>
+          <Major>1</Major>
+          <Minor>1</Minor>
+          <Build>6</Build>
+          <Revision>27644</Revision>
+        </MaxVersion>
+        <WarnOnly>false</WarnOnly>
+        <Message>requires MediaPortal version 1.1.6.27644 to 1.1.6.27644.</Message>
+        <Name>MediaPortal</Name>
+      </DependencyItem>
+    </Items>
+  </Dependencies>
+  <PluginDependencies>
+    <Items>
+      <PluginDependencyItem AssemblyName="CecRemote.dll">
+        <CompatibleVersion>
+          <Items>
+            <CompatibleVersionItem>
+              <MinRequiredVersion>1.1.6.27644</MinRequiredVersion>
+              <DesignedForVersion>1.1.6.27644</DesignedForVersion>
+            </CompatibleVersionItem>
+          </Items>
+        </CompatibleVersion>
+        <SubSystemsUsed>
+          <Items />
+        </SubSystemsUsed>
+      </PluginDependencyItem>
+    </Items>
+  </PluginDependencies>
+  <GeneralInfo>
+    <Name>CecRemote</Name>
+    <Id>596e6736-2353-403f-ac30-3b49bb5c366e</Id>
+    <Author>springfield</Author>
+    <HomePage />
+    <ForumPage />
+    <UpdateUrl />
+    <Version>
+      <Major>0</Major>
+      <Minor>7</Minor>
+      <Build>0</Build>
+      <Revision>0</Revision>
+    </Version>
+    <ExtensionDescription />
+    <VersionDescription />
+    <DevelopmentStatus>Beta</DevelopmentStatus>
+    <OnlineLocation />
+    <ReleaseDate>2012-03-12T22:06:34.1629653+01:00</ReleaseDate>
+    <Tags />
+    <Location>C:\Users\Ziga\Documents\Visual Studio 2010\Projects\CecRemote\CecRemote.mpe1</Location>
+    <Params>
+      <Items>
+        <SectionParam Name="Icon">
+          <Value />
+          <ValueType>File</ValueType>
+          <Description>The icon file of the package (jpg,png,bmp)</Description>
+        </SectionParam>
+        <SectionParam Name="Online Icon">
+          <Value />
+          <ValueType>String</ValueType>
+          <Description>The icon file of the package stored online (jpg,png,bmp)</Description>
+        </SectionParam>
+        <SectionParam Name="Configuration file">
+          <Value />
+          <ValueType>Template</ValueType>
+          <Description>The file used to configure the extension.
+ If have .exe extension the will be executed
+ If have .dll extension used like MP plugin configuration</Description>
+        </SectionParam>
+        <SectionParam Name="Online Screenshots">
+          <Value />
+          <ValueType>String</ValueType>
+          <Description>Online stored screenshot urls separated by ; </Description>
+        </SectionParam>
+        <SectionParam Name="Force to uninstall on update">
+          <Value>yes</Value>
+          <ValueType>Bool</ValueType>
+          <Description>Show dialog and force to uninstall previous version when updating an extension. Should only be disabled if you are using an NSIS/MSI installer.</Description>
+        </SectionParam>
+      </Items>
+    </Params>
+  </GeneralInfo>
+  <UniqueFileList>
+    <Items>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>CecRemote\bin\Debug\CecRemote.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{c489b589-09e0-4824-b2a9-e57f5dac26cc}-CecRemote.dll</ZipFileName>
+        <DestinationFilename>%Plugins%\process\CecRemote.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>CecRemote\bin\Debug\libcec.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{44a5f835-81af-499c-a9ba-2fba5b953864}-libcec.dll</ZipFileName>
+        <DestinationFilename>%Plugins%\process\libcec.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>CecRemote\bin\Debug\LibCecSharp.dll</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{dd9ea537-7dba-4bb2-80e7-7c090a391397}-LibCecSharp.dll</ZipFileName>
+        <DestinationFilename>%Plugins%\process\LibCecSharp.dll</DestinationFilename>
+      </FileItem>
+      <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
+        <Param1 />
+        <UpdateOption>OverwriteIfOlder</UpdateOption>
+        <LocalFileName>CecRemote\CecRemote.xml</LocalFileName>
+        <ZipFileName>Installer{CopyFile}\{9ff7d7bf-8634-41c8-934d-d7d8aac6dc82}-CecRemote.xml</ZipFileName>
+        <DestinationFilename>%Base%\defaults\InputDeviceMappings\CecRemote.xml</DestinationFilename>
+      </FileItem>
+    </Items>
+  </UniqueFileList>
+  <ProjectSettings>
+    <FolderGroups />
+    <ProjectFilename>CecRemote.xmp2</ProjectFilename>
+  </ProjectSettings>
+  <IsSkin>false</IsSkin>
+</PackageClass>
