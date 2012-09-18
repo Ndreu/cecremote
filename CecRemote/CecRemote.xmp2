@@ -12,29 +12,29 @@
           <Items>
             <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
               <Param1 />
-              <UpdateOption>OverwriteIfOlder</UpdateOption>
-              <LocalFileName>CecRemote\bin\Debug\CecRemote.dll</LocalFileName>
+              <UpdateOption>AlwaysOverwrite</UpdateOption>
+              <LocalFileName>Release\CecRemote.dll</LocalFileName>
               <ZipFileName>Installer{CopyFile}\{c489b589-09e0-4824-b2a9-e57f5dac26cc}-CecRemote.dll</ZipFileName>
-              <DestinationFilename>%Plugins%\process\CecRemote.dll</DestinationFilename>
+              <DestinationFilename>%Base%\CecRemote.dll</DestinationFilename>
             </FileItem>
             <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
               <Param1 />
               <UpdateOption>OverwriteIfOlder</UpdateOption>
-              <LocalFileName>CecRemote\bin\Debug\libcec.dll</LocalFileName>
+              <LocalFileName>Release\LibCecSharp\libcec.dll</LocalFileName>
               <ZipFileName>Installer{CopyFile}\{44a5f835-81af-499c-a9ba-2fba5b953864}-libcec.dll</ZipFileName>
-              <DestinationFilename>%Plugins%\process\libcec.dll</DestinationFilename>
+              <DestinationFilename>%Plugins%\process\LibCecSharp\libcec.dll</DestinationFilename>
             </FileItem>
             <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
               <Param1 />
               <UpdateOption>OverwriteIfOlder</UpdateOption>
-              <LocalFileName>CecRemote\bin\Debug\LibCecSharp.dll</LocalFileName>
+              <LocalFileName>Release\LibCecSharp\LibCecSharp.dll</LocalFileName>
               <ZipFileName>Installer{CopyFile}\{dd9ea537-7dba-4bb2-80e7-7c090a391397}-LibCecSharp.dll</ZipFileName>
-              <DestinationFilename>%Plugins%\process\LibCecSharp.dll</DestinationFilename>
+              <DestinationFilename>%Plugins%\process\LibCecSharp\LibCecSharp.dll</DestinationFilename>
             </FileItem>
             <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
               <Param1 />
               <UpdateOption>OverwriteIfOlder</UpdateOption>
-              <LocalFileName>CecRemote\CecRemote.xml</LocalFileName>
+              <LocalFileName>Release\CecRemote.xml</LocalFileName>
               <ZipFileName>Installer{CopyFile}\{9ff7d7bf-8634-41c8-934d-d7d8aac6dc82}-CecRemote.xml</ZipFileName>
               <DestinationFilename>%Base%\defaults\InputDeviceMappings\CecRemote.xml</DestinationFilename>
             </FileItem>
@@ -171,42 +171,28 @@ Click Next to continue or Cancel to exit Setup.</Value>
     </Items>
   </Dependencies>
   <PluginDependencies>
-    <Items>
-      <PluginDependencyItem AssemblyName="CecRemote.dll">
-        <CompatibleVersion>
-          <Items>
-            <CompatibleVersionItem>
-              <MinRequiredVersion>1.1.6.27644</MinRequiredVersion>
-              <DesignedForVersion>1.1.6.27644</DesignedForVersion>
-            </CompatibleVersionItem>
-          </Items>
-        </CompatibleVersion>
-        <SubSystemsUsed>
-          <Items />
-        </SubSystemsUsed>
-      </PluginDependencyItem>
-    </Items>
+    <Items />
   </PluginDependencies>
   <GeneralInfo>
     <Name>CecRemote</Name>
     <Id>596e6736-2353-403f-ac30-3b49bb5c366e</Id>
-    <Author>springfield</Author>
+    <Author>springfield/tuomaa</Author>
     <HomePage />
     <ForumPage />
     <UpdateUrl />
     <Version>
       <Major>0</Major>
-      <Minor>7</Minor>
+      <Minor>8</Minor>
       <Build>0</Build>
       <Revision>0</Revision>
     </Version>
-    <ExtensionDescription />
+    <ExtensionDescription>Plugin, which allows user to control MediaPortal using HDMI-CEC commands with libcec compatible adapters.</ExtensionDescription>
     <VersionDescription />
     <DevelopmentStatus>Beta</DevelopmentStatus>
     <OnlineLocation />
-    <ReleaseDate>2012-03-12T22:06:34.1629653+01:00</ReleaseDate>
+    <ReleaseDate>2012-09-18T23:06:34</ReleaseDate>
     <Tags />
-    <Location>C:\Users\Ziga\Documents\Visual Studio 2010\Projects\CecRemote\CecRemote.mpe1</Location>
+    <Location>S:\work\Remote\Release\CecRemote.mpe1</Location>
     <Params>
       <Items>
         <SectionParam Name="Icon">
@@ -232,7 +218,7 @@ Click Next to continue or Cancel to exit Setup.</Value>
           <Description>Online stored screenshot urls separated by ; </Description>
         </SectionParam>
         <SectionParam Name="Force to uninstall on update">
-          <Value>yes</Value>
+          <Value>YES</Value>
           <ValueType>Bool</ValueType>
           <Description>Show dialog and force to uninstall previous version when updating an extension. Should only be disabled if you are using an NSIS/MSI installer.</Description>
         </SectionParam>
@@ -243,29 +229,29 @@ Click Next to continue or Cancel to exit Setup.</Value>
     <Items>
       <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
         <Param1 />
-        <UpdateOption>OverwriteIfOlder</UpdateOption>
-        <LocalFileName>CecRemote\bin\Debug\CecRemote.dll</LocalFileName>
+        <UpdateOption>AlwaysOverwrite</UpdateOption>
+        <LocalFileName>Release\CecRemote.dll</LocalFileName>
         <ZipFileName>Installer{CopyFile}\{c489b589-09e0-4824-b2a9-e57f5dac26cc}-CecRemote.dll</ZipFileName>
-        <DestinationFilename>%Plugins%\process\CecRemote.dll</DestinationFilename>
+        <DestinationFilename>%Base%\CecRemote.dll</DestinationFilename>
       </FileItem>
       <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
         <Param1 />
         <UpdateOption>OverwriteIfOlder</UpdateOption>
-        <LocalFileName>CecRemote\bin\Debug\libcec.dll</LocalFileName>
+        <LocalFileName>Release\LibCecSharp\libcec.dll</LocalFileName>
         <ZipFileName>Installer{CopyFile}\{44a5f835-81af-499c-a9ba-2fba5b953864}-libcec.dll</ZipFileName>
-        <DestinationFilename>%Plugins%\process\libcec.dll</DestinationFilename>
+        <DestinationFilename>%Plugins%\process\LibCecSharp\libcec.dll</DestinationFilename>
       </FileItem>
       <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
         <Param1 />
         <UpdateOption>OverwriteIfOlder</UpdateOption>
-        <LocalFileName>CecRemote\bin\Debug\LibCecSharp.dll</LocalFileName>
+        <LocalFileName>Release\LibCecSharp\LibCecSharp.dll</LocalFileName>
         <ZipFileName>Installer{CopyFile}\{dd9ea537-7dba-4bb2-80e7-7c090a391397}-LibCecSharp.dll</ZipFileName>
-        <DestinationFilename>%Plugins%\process\LibCecSharp.dll</DestinationFilename>
+        <DestinationFilename>%Plugins%\process\LibCecSharp\LibCecSharp.dll</DestinationFilename>
       </FileItem>
       <FileItem InstallType="CopyFile" SystemFile="false" Modified="true">
         <Param1 />
         <UpdateOption>OverwriteIfOlder</UpdateOption>
-        <LocalFileName>CecRemote\CecRemote.xml</LocalFileName>
+        <LocalFileName>Release\CecRemote.xml</LocalFileName>
         <ZipFileName>Installer{CopyFile}\{9ff7d7bf-8634-41c8-934d-d7d8aac6dc82}-CecRemote.xml</ZipFileName>
         <DestinationFilename>%Base%\defaults\InputDeviceMappings\CecRemote.xml</DestinationFilename>
       </FileItem>
@@ -274,6 +260,9 @@ Click Next to continue or Cancel to exit Setup.</Value>
   <ProjectSettings>
     <FolderGroups />
     <ProjectFilename>CecRemote.xmp2</ProjectFilename>
+    <UpdatePath1 />
+    <UpdatePath2 />
+    <UpdatePath3 />
   </ProjectSettings>
   <IsSkin>false</IsSkin>
 </PackageClass>

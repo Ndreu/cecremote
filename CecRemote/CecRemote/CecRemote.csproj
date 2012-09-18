@@ -30,22 +30,28 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Common.Utils, Version=1.2.1.0, Culture=neutral, processorArchitecture=x86">
+    <Reference Include="Common.Utils, Version=1.2.2.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>D:\Program Files (x86)\Team MediaPortal\MediaPortal\Common.Utils.dll</HintPath>
+      <HintPath>.\Common.Utils.dll</HintPath>
     </Reference>
-    <Reference Include="Core">
-      <HintPath>D:\Program Files (x86)\Team MediaPortal\MediaPortal\Core.dll</HintPath>
+    <Reference Include="Core, Version=1.2.2.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\Core.dll</HintPath>
     </Reference>
     <Reference Include="Dialogs">
-      <HintPath>D:\Program Files (x86)\Team MediaPortal\MediaPortal\plugins\Windows\Dialogs.dll</HintPath>
+      <HintPath>.\Dialogs.dll</HintPath>
     </Reference>
-    <Reference Include="LibCecSharp">
+    <Reference Include="LibCecSharp, Version=1.7.0.0, Culture=neutral, processorArchitecture=x86">
       <HintPath>.\LibCecSharp.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
     </Reference>
     <Reference Include="RemotePlugins">
-      <HintPath>D:\Program Files (x86)\Team MediaPortal\MediaPortal\RemotePlugins.dll</HintPath>
+      <HintPath>.\RemotePlugins.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -56,32 +62,24 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Utils">
-      <HintPath>D:\Program Files (x86)\Team MediaPortal\MediaPortal\Utils.dll</HintPath>
+      <HintPath>.\Utils.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CecClient.cs" />
     <Compile Include="CecRemote.cs" />
-    <Compile Include="PressButton.cs">
+    <Compile Include="CecSettings.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="PressButton.Designer.cs">
-      <DependentUpon>PressButton.cs</DependentUpon>
+    <Compile Include="CecSettings.Designer.cs">
+      <DependentUpon>CecSettings.cs</DependentUpon>
     </Compile>
+    <Compile Include="CecRemoteTypes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SettingsForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SettingsForm.Designer.cs">
-      <DependentUpon>SettingsForm.cs</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="PressButton.resx">
-      <DependentUpon>PressButton.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SettingsForm.resx">
-      <DependentUpon>SettingsForm.cs</DependentUpon>
+    <EmbeddedResource Include="CecSettings.resx">
+      <DependentUpon>CecSettings.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
