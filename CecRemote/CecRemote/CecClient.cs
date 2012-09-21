@@ -10,6 +10,7 @@ namespace CecRemote
     {
         private CecKeypress _key;
         private CecLogMessage _message;
+        private CecCommand _command;
 
         public CecRemoteEventArgs(CecKeypress key)
         {
@@ -18,6 +19,10 @@ namespace CecRemote
         public CecRemoteEventArgs(CecLogMessage message)
         {
             _message = message;
+        }
+        public CecRemoteEventArgs(CecCommand command)
+        {
+            _command = command;
         }
 
         public CecKeypress Key
@@ -28,10 +33,15 @@ namespace CecRemote
         {
             get { return _message; }
         }
+        public CecCommand Command
+        {
+            get { return _command; }
+        }
     }
 
     public delegate void CecRemoteKeyEventHandler(object sender, CecRemoteEventArgs e);
     public delegate void CecRemoteLogEventHandler(object sender, CecRemoteEventArgs e);
+    public delegate void CecRemoteCommandEventHandler(object sender, CecRemoteEventArgs e);
 
     class CecClient : CecCallbackMethods
     {
@@ -41,13 +51,14 @@ namespace CecRemote
 
         public event CecRemoteKeyEventHandler CecRemoteKeyEvent;
         public event CecRemoteLogEventHandler CecRemoteLogEvent;
+        public event CecRemoteCommandEventHandler CecRemoteCommandEvent;
 
         public CecClient(string deviceName, CecDeviceType deviceType, CecLogLevel Level)
         {
             Config = new LibCECConfiguration();
             Config.DeviceTypes.Types[0] = deviceType;
             Config.DeviceName = deviceName;
-            Config.ClientVersion = CecClientVersion.Version1_6_3;
+            Config.ClientVersion = CecClientVersion.Version1_7_0;
             Config.SetCallbacks(this);
             LogLevel = (int) Level;
             
@@ -69,9 +80,38 @@ namespace CecRemote
                 CecRemoteLogEvent(this, e);
             }
         }
+        protected virtual void OnCecRemoteCommandEvent(CecRemoteEventArgs e)
+        {
+            if (CecRemoteCommandEvent != null)
+            {
+                CecRemoteCommandEvent(this, e);
+            }
+        }
 
         public override int ReceiveCommand(CecCommand command)
         {
+            //test fix for samsung play/stop keys
+            if (command.Opcode == CecOpcode.Play || command.Opcode == CecOpcode.DeckControl)
+            {
+                CecKeypress key = new CecKeypress();
+                key.Duration = 0;
+                if (command.Opcode == CecOpcode.Play)
+                {
+                    key.Keycode = CecUserControlCode.Play;
+                }
+                else
+                {
+                    key.Keycode = CecUserControlCode.Stop;
+                }
+
+                CecRemoteEventArgs e = new CecRemoteEventArgs(key);
+                OnCecRemoteKeyEvent(e);
+            }
+            else
+            {
+                CecRemoteEventArgs e = new CecRemoteEventArgs(command);
+                OnCecRemoteCommandEvent(e);
+            }
             return 1;
         }
 

@@ -415,6 +415,7 @@
             this.label7.Size = new System.Drawing.Size(20, 13);
             this.label7.TabIndex = 9;
             this.label7.Text = "ms";
+            this.label7.Visible = false;
             // 
             // numericUpDown3
             // 
@@ -432,6 +433,7 @@
             0,
             0,
             0});
+            this.numericUpDown3.Visible = false;
             // 
             // label6
             // 
@@ -441,6 +443,7 @@
             this.label6.Size = new System.Drawing.Size(60, 13);
             this.label6.TabIndex = 7;
             this.label6.Text = "Stop delay:";
+            this.label6.Visible = false;
             // 
             // label5
             // 
@@ -450,6 +453,7 @@
             this.label5.Size = new System.Drawing.Size(20, 13);
             this.label5.TabIndex = 6;
             this.label5.Text = "ms";
+            this.label5.Visible = false;
             // 
             // numericUpDown2
             // 
@@ -467,6 +471,7 @@
             0,
             0,
             0});
+            this.numericUpDown2.Visible = false;
             // 
             // label4
             // 
@@ -476,6 +481,7 @@
             this.label4.Size = new System.Drawing.Size(60, 13);
             this.label4.TabIndex = 4;
             this.label4.Text = "Start delay:";
+            this.label4.Visible = false;
             // 
             // numericUpDown1
             // 

@@ -32,6 +32,7 @@ namespace CecRemote
         private InputHandler remoteHandler;
         private Thread repeatCommand;
         private volatile bool keyDown;
+        private volatile bool scrolling;
         private int currentKey;
         #endregion
 
@@ -166,9 +167,10 @@ namespace CecRemote
 
 
             client = new CecClient("MediaPortal", type, level);
-            
+
             client.CecRemoteKeyEvent += new CecRemoteKeyEventHandler(oCecRemote_CecRemoteKeyEvent);
             client.CecRemoteLogEvent += new CecRemoteLogEventHandler(oCecRemote_CecRemoteLogEvent);
+            client.CecRemoteCommandEvent += new CecRemoteCommandEventHandler(oCecRemote_CecRemoteCommandEvent);
 
             if (client.Connect(Defaults.CONNECT_DELAY))
             {
@@ -208,31 +210,37 @@ namespace CecRemote
 
         private void oCecRemote_CecRemoteKeyEvent(object sender, CecRemoteEventArgs e)
         {
-            
-            if (e.Key.Duration == 0 && keyDown == false)
-            {
-                remoteHandler.MapAction((int)e.Key.Keycode);
-                return;
-            }
-
             if (fastScrolling)
             {
-                if (e.Key.Duration > startDelay && keyDown == false)
+
+                if (e.Key.Duration == 0 && currentKey != (int)e.Key.Keycode)
                 {
+                    remoteHandler.MapAction((int)e.Key.Keycode);
                     currentKey = (int)e.Key.Keycode;
-                    keyDown = true;
-        
-                    m_keyDownTimer.StartZero();
-                    repeatCommand = new Thread(new ThreadStart(repeatKey));
-                    repeatCommand.Start();
+                    return;
                 }
-                else if (e.Key.Duration < stopDelay && e.Key.Duration != 0 && keyDown == true)
+                else if (e.Key.Duration == 0 && currentKey == (int)e.Key.Keycode)
                 {
-                    keyDown = false;
+
+                    if (keyDown == true && scrolling == false)
+                    {
+                        scrolling = true;
+                        m_keyDownTimer.StartZero();
+                        repeatCommand = new Thread(new ThreadStart(repeatKey));
+                        repeatCommand.Start();
+                    }
+                    else if (keyDown == true && scrolling == true)
+                    {
+                        m_keyDownTimer.StartZero();
+                    }
                 }
-                else
+            }
+            else
+            {
+                if (e.Key.Duration == 0)
                 {
-                    m_keyDownTimer.StartZero();
+                    remoteHandler.MapAction((int)e.Key.Keycode);
+                    return;
                 }
             }
         }
@@ -240,6 +248,21 @@ namespace CecRemote
         private void oCecRemote_CecRemoteLogEvent(object sender, CecRemoteEventArgs e)
         {
             Log.Debug("CecRemote: Message from LibCec: " + e.Message.Message + e.Message.Level.ToString());
+        }
+
+        private void oCecRemote_CecRemoteCommandEvent(object sender, CecRemoteEventArgs e)
+        {
+            if (e.Command.Opcode == CecSharp.CecOpcode.UserControlPressed)
+            {
+                keyDown = true;
+            }
+            else if (e.Command.Opcode == CecSharp.CecOpcode.UserControlRelease)
+            {
+                keyDown = false;
+                scrolling = false;
+                currentKey = -1;
+            }
+
         }
 
 
@@ -252,7 +275,7 @@ namespace CecRemote
             }
 
             m_keyDownTimer.Stop();
-            keyDown = false;
+            //keyDown = false;
         }
 
         //Detect Sleep/Hibernate and resuming events and connect/disconnect CEC-client

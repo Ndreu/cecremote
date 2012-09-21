@@ -11,7 +11,7 @@ namespace CecRemote
         public const ushort HDMI_PORT = 1;
         public const bool FAST_SCROLLING = false;
 
-        public const ushort KEY_DOWN_DELAY = 300;
+        public const ushort KEY_DOWN_DELAY = 700;
         public const ushort KEY_START_DELAY = 260;
         public const ushort KEY_STOP_DELAY = 250;
         public const ushort REPEAT_DELAY = 60;
