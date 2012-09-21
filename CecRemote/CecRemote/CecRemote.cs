@@ -1,4 +1,4 @@
-﻿using System;
+ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -54,7 +54,7 @@ namespace CecRemote
         // Returns the author of the plugin which is shown in the plugin menu
         public string Author()
         {
-            return "springfield";
+            return "Springfield, Tuomas";
         }
 
         // show the setup dialog
@@ -192,20 +192,30 @@ namespace CecRemote
         public void Stop()
         {
             Log.Info("CecRemote: Closing connection to client...");
-
-            client.Close();
-            client = null;
-
+            
+            if(client)
+            {
+            
+              client.Close();
+              client = null;
+            
+            }
+            else
+            {
+               Log.Info("CecRemote: Client already disconnected!");
+            }
+            
             Log.Info("CecRemote: Client closed.");
 
-            if(repeatCommand.IsAlive)
-            {
-                repeatCommand.Abort();
-            }
-
-            repeatCommand = null;
-
-            Log.Info("CecRemote: Plugin exit.");
+             if(repeatCommand.IsAlive)
+             {
+                  repeatCommand.Abort();
+             }
+             repeatCommand = null;
+           
+            
+          Log.Info("CecRemote: Plugin exit.");
+          
         }
 
         private void oCecRemote_CecRemoteKeyEvent(object sender, CecRemoteEventArgs e)
