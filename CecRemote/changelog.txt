@@ -2,6 +2,7 @@ CECREMOTE - Changelog
 
 0.8.2
 
+*fix interface now compatible with libcec 2.x (2.0.2 included)
 *fix numeric up-down for filter delay not enabled after selection
 *fix random crashing after resuming from sleep/hibernate
 *fix setting AVR manually as active source crashes plugin (removed, now automatically set)
