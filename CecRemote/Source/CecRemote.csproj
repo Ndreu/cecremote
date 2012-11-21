@@ -45,10 +45,9 @@
     <Reference Include="Dialogs">
       <HintPath>.\Dialogs.dll</HintPath>
     </Reference>
-    <Reference Include="LibCecSharp, Version=1.7.0.0, Culture=neutral, processorArchitecture=x86">
-      <HintPath>.\LibCecSharp.dll</HintPath>
+    <Reference Include="LibCecSharp, Version=2.0.2.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
+      <HintPath>.\LibCecSharp.dll</HintPath>
     </Reference>
     <Reference Include="RemotePlugins">
       <HintPath>.\RemotePlugins.dll</HintPath>
@@ -67,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CecClient.cs" />
+    <Compile Include="CecConfig.cs" />
     <Compile Include="CecRemote.cs" />
     <Compile Include="CecSettings.cs">
       <SubType>Form</SubType>
@@ -76,13 +76,31 @@
     </Compile>
     <Compile Include="CecRemoteTypes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="CecSettings.resx">
       <DependentUpon>CecSettings.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\cecremotelogo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\cecremotelogo_disabled.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy /Y $(TargetDir)$(TargetFileName) \\MEDIACENTER\process</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

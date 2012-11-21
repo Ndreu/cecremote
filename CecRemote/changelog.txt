@@ -1,0 +1,24 @@
+CECREMOTE - Changelog
+
+0.8.2
+
+*fix numeric up-down for filter delay not enabled after selection
+*fix random crashing after resuming from sleep/hibernate
+*fix setting AVR manually as active source crashes plugin (removed, now automatically set)
+
+0.8.2 (alpha)
+
+*+ filtering for short pulses (to prevent double key strokes)
+*+ option to shutdown TV when MP stops
+*+ option to power on TV when MP starts
+
+*fix null reference problem after reconnect
+
+
+0.8.1 (beta)
+
+*+ setting for device type
+*+ custom keymap settings
+*+ initial version of fastscrolling feature
+
+*fix re-connection issue after sleep/hibernate

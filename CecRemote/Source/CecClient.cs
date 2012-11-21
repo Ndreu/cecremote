@@ -45,24 +45,33 @@ namespace CecRemote
 
     class CecClient : CecCallbackMethods
     {
-        private int LogLevel;
-        private LibCecSharp Lib;
-        private LibCECConfiguration Config;
+        private int _logLevel;
+        private LibCecSharp _lib;
+        private LibCECConfiguration _config;
+        private int _filterDelay;
+        private bool _sendInactiveSource;
+        private bool _powerOff;
 
         public event CecRemoteKeyEventHandler CecRemoteKeyEvent;
         public event CecRemoteLogEventHandler CecRemoteLogEvent;
         public event CecRemoteCommandEventHandler CecRemoteCommandEvent;
 
-        public CecClient(string deviceName, CecDeviceType deviceType, CecLogLevel Level)
+        public CecClient(string deviceName, CecDeviceType deviceType, CecLogLevel Level, byte HdmiPort = 0)
         {
-            Config = new LibCECConfiguration();
-            Config.DeviceTypes.Types[0] = deviceType;
-            Config.DeviceName = deviceName;
-            Config.ClientVersion = CecClientVersion.Version1_7_0;
-            Config.SetCallbacks(this);
-            LogLevel = (int) Level;
+            _config = new LibCECConfiguration();
+            _config.DeviceTypes.Types[0] = deviceType;
+            _config.DeviceName = deviceName;
+            _config.ClientVersion = CecClientVersion.Version2_0_2;
             
-            Lib = new LibCecSharp(Config);
+            
+            if (HdmiPort != 0)
+            { _config.HDMIPort = HdmiPort; }
+
+            _config.SetCallbacks(this);
+            _logLevel = (int) Level;
+            _filterDelay = 0;
+            
+            _lib = new LibCecSharp(_config);
 
         }
 
@@ -90,14 +99,16 @@ namespace CecRemote
 
         public override int ReceiveCommand(CecCommand command)
         {
-            //test fix for samsung play/stop keys
-            if (command.Opcode == CecOpcode.Play || command.Opcode == CecOpcode.DeckControl)
+            
+            // Dirty fix for some play/stop keys
+            if ((command.Opcode == CecOpcode.Play || command.Opcode == CecOpcode.DeckControl) 
+                && command.Initiator == CecLogicalAddress.Tv && command.Parameters.Size == 1)
             {
                 CecKeypress key = new CecKeypress();
-                key.Duration = 0;
-                if (command.Opcode == CecOpcode.Play)
+                key.Duration = (uint)_filterDelay;
+                if (command.Opcode == CecOpcode.Play )
                 {
-                    key.Keycode = CecUserControlCode.Play;
+                    key.Keycode = CecUserControlCode.Pause;   
                 }
                 else
                 {
@@ -117,6 +128,17 @@ namespace CecRemote
 
         public override int ReceiveKeypress(CecKeypress key)
         {
+            if(_filterDelay == 0)
+            {
+                if(key.Duration != 0)
+                { return 1; }
+            }
+            else
+            {
+                if(key.Duration < _filterDelay)
+                { return 1; }
+            }
+
             CecRemoteEventArgs e = new CecRemoteEventArgs(key);
             OnCecRemoteKeyEvent(e);
 
@@ -125,7 +147,7 @@ namespace CecRemote
 
         public override int ReceiveLogMessage(CecLogMessage message)
         {
-            if ((int)message.Level <= LogLevel)
+            if ((int)message.Level <= _logLevel)
             {
                 CecRemoteEventArgs e = new CecRemoteEventArgs(message);
                 OnCecRemoteLogEvent(e);               
@@ -133,7 +155,7 @@ namespace CecRemote
             return 1;
         }
 
-        public override int ConfigurationChanged(LibCECConfiguration config)
+        public override int ConfigurationChanged(LibCECConfiguration _config)
         {
             
             return 1;
@@ -142,7 +164,7 @@ namespace CecRemote
 
         public bool Connect(int timeout)
         {
-            CecAdapter[] adapters = Lib.FindAdapters(string.Empty);
+            CecAdapter[] adapters = _lib.FindAdapters(string.Empty);
             if (adapters.Length > 0)
             {
                 return Connect(adapters[0].ComPort, timeout);
@@ -153,35 +175,72 @@ namespace CecRemote
 
         public bool Connect(string port, int timeout)
         {
-            return Lib.Open(port, timeout);
+            return _lib.Open(port, timeout);
         }
 
         public void Close()
         {
-            Lib.DisableCallbacks();
-            Lib.Close();
-            Lib.Dispose();
+            if (_lib != null)
+            {
+                if (_sendInactiveSource)
+                {
+                    _lib.SetInactiveView();
+                }
+                if (_powerOff)
+                {
+                    _lib.StandbyDevices(CecLogicalAddress.Broadcast);
+                }
 
-            Lib = null;
-            Config = null;
+                _lib.DisableCallbacks();
+                _lib.Close();
+                _lib.Dispose();
+
+                _lib = null;
+                _config = null;
+            }
         }
 
-        public void setHdmiPort(int address, int port)
+        public void setFilterDelay(int delay)
         {
-            Lib.SetHDMIPort((CecLogicalAddress)address, (byte)port);
+            if (delay < 0)
+            { return; }
+
+            _filterDelay = delay;
+        }
+
+        public void setExitCommands(bool inactiveSource, bool powerOff)
+        {
+            this._sendInactiveSource = inactiveSource;
+            this._powerOff = powerOff;
+        }
+
+
+        public void setHdmiPort(CecLogicalAddress address, int port)
+        {
+            _lib.SetHDMIPort((CecLogicalAddress)address, (byte)port);
+        }
+
+        public bool getHdmiAutodetectStatus()
+        {
+            return _config.AutodetectAddress;
         }
 
         public ushort getFirmwareVersion()
         {
             LibCECConfiguration temp = new LibCECConfiguration();
-            Lib.GetCurrentConfiguration(temp);
+            _lib.GetCurrentConfiguration(temp);
 
             return temp.FirmwareVersion;
         }
 
+        public string getLibVersion()
+        {
+            return _lib.GetLibInfo();
+        }
+
         public string getTvVendor()
         {
-            CecVendorId tv = Lib.GetDeviceVendorId(CecLogicalAddress.Tv);
+            CecVendorId tv = _lib.GetDeviceVendorId(CecLogicalAddress.Tv);
 
             return tv.ToString();
         }
@@ -189,9 +248,9 @@ namespace CecRemote
         public string getAVRdevice()
         {
 
-            if(Lib.IsActiveDevice(CecLogicalAddress.AudioSystem))
+            if(_lib.IsActiveDevice(CecLogicalAddress.AudioSystem))
             {
-                return Lib.GetDeviceVendorId(CecLogicalAddress.AudioSystem).ToString();
+                return _lib.GetDeviceVendorId(CecLogicalAddress.AudioSystem).ToString();
             }
 
             return null;

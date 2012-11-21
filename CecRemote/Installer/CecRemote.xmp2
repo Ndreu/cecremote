@@ -192,22 +192,22 @@ Click Next to continue or Cancel to exit Setup.</Value>
   </PluginDependencies>
   <GeneralInfo>
     <Name>CecRemote</Name>
-    <Id>596e6736-2353-403f-ac30-3b49bb5c366e</Id>
-    <Author>springfield/tuomaa</Author>
+    <Id>cb89aada-3b22-44e3-b5dc-f4fb02940f42</Id>
+    <Author>Tuomas, Springfield</Author>
     <HomePage />
     <ForumPage />
     <UpdateUrl />
     <Version>
       <Major>0</Major>
       <Minor>8</Minor>
-      <Build>0</Build>
-      <Revision>1</Revision>
+      <Build>2</Build>
+      <Revision>0</Revision>
     </Version>
     <ExtensionDescription>Plugin, which allows user to control MediaPortal using HDMI-CEC commands with libcec compatible adapters.</ExtensionDescription>
     <VersionDescription />
-    <DevelopmentStatus>Beta</DevelopmentStatus>
+    <DevelopmentStatus>Stable</DevelopmentStatus>
     <OnlineLocation />
-    <ReleaseDate>2012-09-18T23:06:34</ReleaseDate>
+    <ReleaseDate>2012-11-15T23:06:34</ReleaseDate>
     <Tags />
     <Location>S:\work\Remote\Release\CecRemote.mpe1</Location>
     <Params>
@@ -235,7 +235,7 @@ Click Next to continue or Cancel to exit Setup.</Value>
           <Description>Online stored screenshot urls separated by ; </Description>
         </SectionParam>
         <SectionParam Name="Force to uninstall on update">
-          <Value>NO</Value>
+          <Value>YES</Value>
           <ValueType>Bool</ValueType>
           <Description>Show dialog and force to uninstall previous version when updating an extension. Should only be disabled if you are using an NSIS/MSI installer.</Description>
         </SectionParam>
