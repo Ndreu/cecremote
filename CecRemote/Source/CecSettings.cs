@@ -1,4 +1,20 @@
-﻿using System;
+﻿// This file is part of CECRemote.
+//
+// CECRemote is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 2 of the License, or
+// (at your option) any later version.
+//
+// CECRemote is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with CECRemote. If not, see <http://www.gnu.org/licenses/>.
+
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -55,14 +71,22 @@ namespace CecRemote
 
         private void setControls()
         {
-            numericUpDownHdmi.Value = _config.HdmiPort;
-            numericUpDownFilter.Value = _config.FilterDelay;
-            numericUpDownFilter.Enabled = _config.FilterShortPulses;
-            checkBoxIgnoreShortPulses.Checked = _config.FilterShortPulses;
-            checkBoxFastScrolling.Checked = _config.FastScrolling;
-            checkBoxInactiveSource.Checked = _config.SendInactiveSource;
-            checkBoxPowerOff.Checked = _config.PowerOff;
-            comboBoxDeviceType.SelectedItem = _config.CecType.ToString();
+            try
+            {
+                numericUpDownHdmi.Value = _config.HdmiPort;
+                numericUpDownFilter.Value = _config.FilterDelay;
+                numericUpDownFilter.Enabled = _config.FilterShortPulses;
+                checkBoxIgnoreShortPulses.Checked = _config.FilterShortPulses;
+                checkBoxFastScrolling.Checked = _config.FastScrolling;
+                checkBoxInactiveSource.Checked = _config.SendInactiveSource;
+                checkBoxPowerOff.Checked = _config.PowerOff;
+                comboBoxDeviceType.SelectedItem = _config.CecType.ToString();
+            }
+            catch
+            {
+                Log.Error("CecRemote: Could not set config values to dialog, using defaults.");
+            }
+
         }
 
 
@@ -77,8 +101,8 @@ namespace CecRemote
 
             if (_client.Connect(Defaults.CONNECT_DELAY))
             {
-                // Set filter delay for 1, to show ignored pulses in test tab
-                _client.setFilterDelay(1);
+                // Set filter delay
+                _client.setFilterDelay(_config.FilterDelay);
 
                 // Send connected
                 backgroundWorkerConnect.ReportProgress(30, "Connected=1");
@@ -287,11 +311,6 @@ namespace CecRemote
             string[] listItem = new string[3];
             listItem[0] = ((int)e.Key.Keycode).ToString();
             listItem[1] = e.Key.Keycode.ToString();
-            listItem[2] = e.Key.Duration.ToString();
-            if (checkBoxIgnoreShortPulses.Checked && e.Key.Duration < (int)numericUpDownFilter.Value)
-            {
-                    listItem[2] = "Ignored";
-            }
 
             ListViewItem lvi = new ListViewItem(listItem);
             listViewTestKeys.Items.Insert(0, lvi);

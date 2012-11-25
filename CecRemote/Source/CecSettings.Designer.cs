@@ -1,4 +1,19 @@
-﻿namespace CecRemote
+﻿// This file is part of CECRemote.
+//
+// CECRemote is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 2 of the License, or
+// (at your option) any later version.
+//
+// CECRemote is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with CECRemote. If not, see <http://www.gnu.org/licenses/>.
+
+namespace CecRemote
 {
     partial class CecSettings
     {
@@ -67,7 +82,6 @@
             this.listViewTestKeys = new System.Windows.Forms.ListView();
             this.columnKeyCode = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnDescription = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnDuration = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.buttonClose = new System.Windows.Forms.Button();
@@ -400,9 +414,11 @@
             this.checkBoxIgnoreShortPulses.AutoSize = true;
             this.checkBoxIgnoreShortPulses.Location = new System.Drawing.Point(9, 42);
             this.checkBoxIgnoreShortPulses.Name = "checkBoxIgnoreShortPulses";
-            this.checkBoxIgnoreShortPulses.Size = new System.Drawing.Size(177, 17);
+            this.checkBoxIgnoreShortPulses.Size = new System.Drawing.Size(163, 17);
             this.checkBoxIgnoreShortPulses.TabIndex = 11;
-            this.checkBoxIgnoreShortPulses.Text = "Ignore key presses shorter than:";
+            this.checkBoxIgnoreShortPulses.Text = "Require delay between keys:";
+            this.toolTip1.SetToolTip(this.checkBoxIgnoreShortPulses, "If you have problems with double taps, check this setting and set a delay that wo" +
+                    "rks for you.\r\nLeave unchecked if you don\'t get double taps.\r\n");
             this.checkBoxIgnoreShortPulses.UseVisualStyleBackColor = true;
             this.checkBoxIgnoreShortPulses.CheckedChanged += new System.EventHandler(this.checkBoxIgnoreShortPulses_CheckedChanged);
             // 
@@ -429,9 +445,19 @@
             // 
             // numericUpDownFilter
             // 
+            this.numericUpDownFilter.Increment = new decimal(new int[] {
+            15,
+            0,
+            0,
+            0});
             this.numericUpDownFilter.Location = new System.Drawing.Point(198, 41);
             this.numericUpDownFilter.Maximum = new decimal(new int[] {
-            99,
+            500,
+            0,
+            0,
+            0});
+            this.numericUpDownFilter.Minimum = new decimal(new int[] {
+            100,
             0,
             0,
             0});
@@ -440,7 +466,7 @@
             this.numericUpDownFilter.TabIndex = 3;
             this.numericUpDownFilter.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.numericUpDownFilter.Value = new decimal(new int[] {
-            40,
+            300,
             0,
             0,
             0});
@@ -471,8 +497,7 @@
             this.listViewTestKeys.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.listViewTestKeys.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnKeyCode,
-            this.columnDescription,
-            this.columnDuration});
+            this.columnDescription});
             this.listViewTestKeys.ContextMenuStrip = this.contextMenuStrip1;
             this.listViewTestKeys.FullRowSelect = true;
             this.listViewTestKeys.GridLines = true;
@@ -494,11 +519,6 @@
             // 
             this.columnDescription.Text = "Description";
             this.columnDescription.Width = 122;
-            // 
-            // columnDuration
-            // 
-            this.columnDuration.Text = "Duration";
-            this.columnDuration.Width = 55;
             // 
             // contextMenuStrip1
             // 
@@ -601,7 +621,6 @@
         private System.Windows.Forms.ListView listViewTestKeys;
         private System.Windows.Forms.ColumnHeader columnKeyCode;
         private System.Windows.Forms.ColumnHeader columnDescription;
-        private System.Windows.Forms.ColumnHeader columnDuration;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem copyToolStripMenuItem;
         private System.Windows.Forms.CheckBox checkBoxIgnoreShortPulses;

@@ -1,4 +1,21 @@
-﻿using System;
+﻿// This file is part of CECRemote.
+//
+// CECRemote is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 2 of the License, or
+// (at your option) any later version.
+//
+// CECRemote is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with CECRemote. If not, see <http://www.gnu.org/licenses/>.
+
+
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -51,6 +68,7 @@ namespace CecRemote
         private int _filterDelay;
         private bool _sendInactiveSource;
         private bool _powerOff;
+        private DateTime _keyTimeStamp;
 
         public event CecRemoteKeyEventHandler CecRemoteKeyEvent;
         public event CecRemoteLogEventHandler CecRemoteLogEvent;
@@ -58,6 +76,8 @@ namespace CecRemote
 
         public CecClient(string deviceName, CecDeviceType deviceType, CecLogLevel Level, byte HdmiPort = 0)
         {
+            _keyTimeStamp = DateTime.Now;
+
             _config = new LibCECConfiguration();
             _config.DeviceTypes.Types[0] = deviceType;
             _config.DeviceName = deviceName;
@@ -128,15 +148,18 @@ namespace CecRemote
 
         public override int ReceiveKeypress(CecKeypress key)
         {
-            if(_filterDelay == 0)
+            if (key.Duration != 0)
+            { return 1; }
+
+            else if(_filterDelay != 0)
             {
-                if(key.Duration != 0)
+                DateTime current = DateTime.Now;
+                TimeSpan temp = current.Subtract(_keyTimeStamp);
+
+                if(temp.TotalMilliseconds < _filterDelay)
                 { return 1; }
-            }
-            else
-            {
-                if(key.Duration < _filterDelay)
-                { return 1; }
+
+                _keyTimeStamp = current;
             }
 
             CecRemoteEventArgs e = new CecRemoteEventArgs(key);
