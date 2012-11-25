@@ -1,5 +1,11 @@
 CECREMOTE - Changelog
 
+0.8.3
+
+*fix 	combo key problems solved with custom libcec 2.0.4 for now
+*change	key duration values removed from test tab
+*change	double tap filtering done differently on client side, users now set desired timeout between key presses
+
 0.8.2
 
 *fix interface now compatible with libcec 2.x (2.0.2 included)
