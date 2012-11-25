@@ -277,6 +277,7 @@
             this.buttonSaveSettings.TabIndex = 5;
             this.buttonSaveSettings.Text = "Save settings";
             this.buttonSaveSettings.UseVisualStyleBackColor = true;
+            this.buttonSaveSettings.Click += new System.EventHandler(this.buttonSaveSettings_Click);
             // 
             // groupBox3
             // 

@@ -77,6 +77,9 @@ namespace CecRemote
 
             if (_client.Connect(Defaults.CONNECT_DELAY))
             {
+                // Set filter delay for 1, to show ignored pulses in test tab
+                _client.setFilterDelay(1);
+
                 // Send connected
                 backgroundWorkerConnect.ReportProgress(30, "Connected=1");
                 
@@ -237,7 +240,6 @@ namespace CecRemote
         {
             try
             {
-
                 _config.HdmiPort = (int)numericUpDownHdmi.Value;
                 _config.CecType = (CecSharp.CecDeviceType)Enum.Parse(typeof(CecSharp.CecDeviceType), comboBoxDeviceType.SelectedItem.ToString());
                 _config.FastScrolling = checkBoxFastScrolling.Checked;
