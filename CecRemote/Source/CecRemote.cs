@@ -21,6 +21,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Threading;
+using System.Runtime.InteropServices;
 using System.Collections.ObjectModel;
 using MediaPortal.GUI.Library;
 using MediaPortal.Dialogs;
@@ -36,8 +37,26 @@ namespace CecRemote
 {
 
     [PluginIcons("CecRemote.Resources.cecremotelogo.png", "CecRemote.Resources.cecremotelogo_disabled.png")]
-    public class CecRemote : ISetupForm, IPlugin
+    public class CecRemote : ISetupForm, IPlugin, IPluginReceiver
     {
+
+        [DllImport("user32.dll")]
+        static extern void keybd_event(byte bVk, byte bScan, uint dwFlags,
+           int dwExtraInfo);
+
+
+ 
+
+        const int KEYEVENTF_EXTENDEDKEY = 0x1;
+        const int KEYEVENTF_KEYUP = 0x2;
+        public const byte VK_LSHIFT = 0xA0;
+
+
+        private const int WM_POWERBROADCAST = 0x0218;
+        const int PBT_APMSUSPEND = 0x0004;
+        const int PBT_APMRESUMEAUTOMATIC = 0x0012;
+        const int PBT_APMRESUMESUSPEND = 0x0007;
+
         #region members
 
         private CecConfig _config;
@@ -153,11 +172,8 @@ namespace CecRemote
             _fastScrolling = _config.FastScrolling;
             _keyDownDelay = _config.KeyDownDelay;
 
-            //Subscribe to PowerModeChanged events.
-            SystemEvents.PowerModeChanged += new PowerModeChangedEventHandler(SystemEvents_PowerModeChanged);
-
             // Connect to client and start receiving commands
-            connectClient();
+            connectClient(false);
            
         }
 
@@ -200,8 +216,18 @@ namespace CecRemote
 
         }
 
-        private void connectClient()
+        private void connectClient(bool activateSource = true)
         {
+            if (_client != null)
+            {
+                if (activateSource)
+                {
+                    _client.sendActiveSource();
+                }
+
+                return;
+            }
+                
             CecSharp.CecLogLevel level;
 
             switch ((MediaPortal.Services.Level)_config.LogLevel)
@@ -228,7 +254,7 @@ namespace CecRemote
             Log.Info("CecRemote: LibCec log level set to: " + level.ToString());
 
 
-            _client = new CecClient("MediaPortal", _config.CecType, level, (byte)_config.HdmiPort);
+            _client = new CecClient("MediaPortal", _config.CecType, level, (byte)_config.HdmiPort, activateSource);
 
             _client.CecRemoteKeyEvent += new CecRemoteKeyEventHandler(oCecRemote_CecRemoteKeyEvent);
             _client.CecRemoteLogEvent += new CecRemoteLogEventHandler(oCecRemote_CecRemoteLogEvent);
@@ -243,19 +269,19 @@ namespace CecRemote
                 {
                     _config.ConnectedTo = CecSharp.CecLogicalAddress.AudioSystem;
                 }
-
+                
                 if (_config.HdmiPort != 0)
                 {
                     _client.setHdmiPort(_config.ConnectedTo, _config.HdmiPort);
                 }
-
+                
                 if (_config.FilterShortPulses)
                 {
                     _client.setFilterDelay(_config.FilterDelay);
                 }
 
                 _client.setExitCommands(_config.SendInactiveSource, _config.PowerOff);
-
+ 
                 Log.Info("CecRemote: Client connected!");
 
             }
@@ -268,6 +294,8 @@ namespace CecRemote
 
         private void oCecRemote_CecRemoteKeyEvent(object sender, CecRemoteEventArgs e)
         {
+            Log.Info("CecRemote: Message from LibCec: KeyEvent start.");
+
             if (_fastScrolling)
             {
                 if (_currentKey == _previousKey && _previousKey == (int)e.Key.Keycode)
@@ -285,21 +313,27 @@ namespace CecRemote
                         
                         _keyDownTimer.StartZero();
                     }
+
+                    return;
                 }
                 else
                 {
                     _remoteHandler.MapAction((int)e.Key.Keycode);
                     _previousKey = _currentKey;
                     _currentKey = (int)e.Key.Keycode;
-                    return;
+                    
                 }
             }
             else
             {
 
                 _remoteHandler.MapAction((int)e.Key.Keycode);
-                return;
+                
             }
+
+            keybd_event(VK_LSHIFT, 0x2A, 0, 0);
+            keybd_event(VK_LSHIFT, 0xAA, KEYEVENTF_KEYUP, 0);
+             
         }
 
         private void oCecRemote_CecRemoteLogEvent(object sender, CecRemoteEventArgs e)
@@ -309,6 +343,8 @@ namespace CecRemote
 
         private void oCecRemote_CecRemoteCommandEvent(object sender, CecRemoteEventArgs e)
         {
+            Log.Info("CecRemote: Message from LibCec: CommandEvent start.");
+
             if (e.Command.Opcode == CecSharp.CecOpcode.UserControlPressed)
             {
                 _keyDown = true;
@@ -320,6 +356,8 @@ namespace CecRemote
                 _currentKey = -1;
                 _previousKey = -1;
             }
+
+            Log.Info("CecRemote: Message from LibCec: CommandEvent stop.");
         }
 
 
@@ -335,23 +373,34 @@ namespace CecRemote
             _keyDown = false;
         }
 
-        //Detect Sleep/Hibernate and resuming events and connect/disconnect CEC-client
-        void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
+        public bool WndProc(ref Message msg)
         {
-            //If user puts computer to sleep
-            if (e.Mode == PowerModes.Suspend)
+            if (msg.Msg == WM_POWERBROADCAST)
             {
-                Log.Info("CecRemote: System going to sleep, stoppping CEC-client...");
-                Stop(); //Disconnect
-            }
-            else if (e.Mode == PowerModes.Resume)
-            {
-                Log.Info("CecRemote: System resuming from sleep, starting CEC-client...");
-                connectClient(); //Connect again when resuming from sleep
+
+                switch (msg.WParam.ToInt32())
+                {
+                    case PBT_APMSUSPEND:
+                        Log.Info("CecRemote: PowerControl: System going to sleep, stoppping CEC-client...");
+                        Stop(); //Disconnect
+                        break;
+
+                    case PBT_APMRESUMESUSPEND:
+                        Log.Info("CecRemote: PowerControl: User input detected after sleep (APMRESUMESUSPEND), powering on TV...");
+                        connectClient(true); // If client connected already, power on tv (true = power tv)
+                        break;
+
+                    case PBT_APMRESUMEAUTOMATIC:
+                        Log.Info("CecRemote: PowerControl: System resuming from sleep (APMRESUMEAUTOMATIC), starting CEC-client...");
+                        connectClient(false); //Connect again when resuming from sleep (false = don't power tv)
+                        break;
+
+                    default:
+                        break;
+                }
             }
 
+            return false; // false = allow other plugins to handle the message
         }
-
-
     }
 }

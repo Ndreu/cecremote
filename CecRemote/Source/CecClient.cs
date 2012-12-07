@@ -74,7 +74,7 @@ namespace CecRemote
         public event CecRemoteLogEventHandler CecRemoteLogEvent;
         public event CecRemoteCommandEventHandler CecRemoteCommandEvent;
 
-        public CecClient(string deviceName, CecDeviceType deviceType, CecLogLevel Level, byte HdmiPort = 0)
+        public CecClient(string deviceName, CecDeviceType deviceType, CecLogLevel Level, byte HdmiPort = 0, bool activateSource = true)
         {
             _keyTimeStamp = DateTime.Now;
 
@@ -82,7 +82,7 @@ namespace CecRemote
             _config.DeviceTypes.Types[0] = deviceType;
             _config.DeviceName = deviceName;
             _config.ClientVersion = CecClientVersion.Version2_0_2;
-            
+            _config.ActivateSource = activateSource;
             
             if (HdmiPort != 0)
             { _config.HDMIPort = HdmiPort; }
@@ -217,7 +217,7 @@ namespace CecRemote
                 _lib.DisableCallbacks();
                 _lib.Close();
                 _lib.Dispose();
-
+                
                 _lib = null;
                 _config = null;
             }
@@ -237,6 +237,11 @@ namespace CecRemote
             this._powerOff = powerOff;
         }
 
+        public void sendActiveSource()
+        {
+            _lib.SetActiveSource(_config.DeviceTypes.Types[0]);
+            return;
+        }
 
         public void setHdmiPort(CecLogicalAddress address, int port)
         {
