@@ -1,6 +1,6 @@
 ﻿// CECRemote
 //
-// Copyright (C) 2012, CECRemote team
+// Copyright (C) 2012-2013, CECRemote team
 //
 // CECRemote is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,21 +17,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
+using System.Xml;
+using System.Reflection;
 using System.Windows.Forms;
-using System.Threading;
-using System.Runtime.InteropServices;
-using System.Collections.ObjectModel;
 using MediaPortal.GUI.Library;
-using MediaPortal.Dialogs;
-using MediaPortal.Utils;
-using MediaPortal.Util;
 using MediaPortal.Configuration;
-using MediaPortal.Common.Utils;
-using MediaPortal.InputDevices;
-using MediaPortal.Profile;
-using Microsoft.Win32;
+
 
 namespace CecRemote
 {
@@ -40,37 +32,22 @@ namespace CecRemote
     public class CecRemote : ISetupForm, IPlugin, IPluginReceiver
     {
 
-        [DllImport("user32.dll")]
-        static extern void keybd_event(byte bVk, byte bScan, uint dwFlags,
-           int dwExtraInfo);
-
-
- 
-
-        const int KEYEVENTF_EXTENDEDKEY = 0x1;
-        const int KEYEVENTF_KEYUP = 0x2;
-        public const byte VK_LSHIFT = 0xA0;
-
+        #region wm_powerconstants
 
         private const int WM_POWERBROADCAST = 0x0218;
         const int PBT_APMSUSPEND = 0x0004;
         const int PBT_APMRESUMEAUTOMATIC = 0x0012;
         const int PBT_APMRESUMESUSPEND = 0x0007;
+        #endregion
 
         #region members
 
+        private CecRemoteClient _client;
         private CecConfig _config;
-        private bool _fastScrolling;
-        private int _keyDownDelay;
+        private bool _sleep;
+        private readonly string DefaultLanguage = "en-US";
+        private readonly string Guid = "cb89aada-3b22-44e3-b5dc-f4fb02940f42";
 
-        private StopWatch _keyDownTimer;
-        private CecClient _client;
-        private InputHandler _remoteHandler;
-        private Thread _repeatCommand;
-        private volatile bool _keyDown;
-        private volatile bool _scrolling;
-        private int _currentKey;
-        private int _previousKey;
         #endregion
 
 
@@ -91,15 +68,17 @@ namespace CecRemote
         // Returns the author of the plugin which is shown in the plugin menu
         public string Author()
         {
-            return "Tuomas, Springfield";
+            return "Tuomaa, Springfield, libcec by Pulse-Eight";
         }
 
         // show the setup dialog
         public void ShowPlugin()
         {
+          
             CecSettings settings = new CecSettings();
             settings.StartPosition = FormStartPosition.CenterParent;
             settings.ShowDialog();
+           
         }
 
         // Indicates whether plugin can be enabled/disabled
@@ -111,9 +90,9 @@ namespace CecRemote
         // Get Windows-ID
         public int GetWindowId()
         {
-            // WindowID of windowplugin belonging to this setup
-            // enter your own unique code
-            return -1;
+          // WindowID of windowplugin belonging to this setup
+          // enter your own unique code
+          return 50001;
         }
 
         // Indicates if plugin is enabled by default;
@@ -150,31 +129,37 @@ namespace CecRemote
             return false;
         }
 
-        // With GetID it will be an window-plugin / otherwise a process-plugin
-        // Enter the id number here again
-
-
         #endregion
 
         public void Start()
         {
+          _sleep = false;
 
-            _currentKey = -1;
-            _previousKey = -1;
-            _keyDown = false;
+          PrepareClient();
 
-            // Create configuration instance and read current configuration
-            Log.Info("CecRemote: Loading configuration...");
-            _config = new CecConfig();
-            _config.ReadConfig(Defaults.CONFIG);
-            Log.Info("CecRemote: Configuration loaded.");
-
-            _fastScrolling = _config.FastScrolling;
-            _keyDownDelay = _config.KeyDownDelay;
-
-            // Connect to client and start receiving commands
-            connectClient(false);
+          _client.OnStart();
            
+
+          // Try to subscribe to Extensions plugin update event.
+          // This is potentially flaky if Extensions plugin is not loaded yet,
+          // but windowplugins are loaded first, so it should work OK.
+
+          try
+          {
+            var extensions = GUIWindowManager.GetWindow(803);  // Extensions ID is 803
+            EventInfo evt = extensions.GetType().GetEvent("OnSettingsChanged");
+            MethodInfo handler = this.GetType().GetMethod("MPEI_OnConfigurationChanged");
+            Delegate del = Delegate.CreateDelegate(evt.EventHandlerType, this, handler);
+
+            evt.AddEventHandler(extensions, del);
+
+            LoadTranslations();
+          }
+          catch
+          {
+            Log.Debug("CecRemote: Error while subscribing to extensions update event, extensions plugin probably not installed.");
+          }
+
         }
 
 
@@ -182,195 +167,19 @@ namespace CecRemote
         {
             Log.Info("CecRemote: Closing connection to client...");
 
-            try
+            if (_client == null)
             {
-                if (_client != null)
-                {
-                    _client.Close();
-                    _client = null;
-                    Log.Info("CecRemote: Client closed.");
-                }
-                else
-                {
-                    Log.Info("CecRemote: Client already disconnected!");
-                }
-
-
-                if (_repeatCommand != null)
-                {
-                    if (_repeatCommand.IsAlive)
-                    {
-                        _repeatCommand.Abort();
-                    }
-
-                    _repeatCommand = null;
-                }
+              Log.Info("CecRemote: Client already closed. Plugin exit.");
+              return;
             }
-            catch (Exception ex)
-            {
-                Log.Error("CecRemote: Client was not properly closed! {0}", ex.ToString());
-                throw;
-            }
+
+            _client.OnStop();
+
+            _client = null;
+            _config = null;
 
             Log.Info("CecRemote: Plugin exit.");
 
-        }
-
-        private void connectClient(bool activateSource = true)
-        {
-            if (_client != null)
-            {
-                if (activateSource)
-                {
-                    _client.sendActiveSource();
-                }
-
-                return;
-            }
-                
-            CecSharp.CecLogLevel level;
-
-            switch ((MediaPortal.Services.Level)_config.LogLevel)
-            {
-                /*
-                case MediaPortal.Services.Level.Error:
-                    level = CecSharp.CecLogLevel.Error;
-                    break;
-                case MediaPortal.Services.Level.Warning:
-                    level = CecSharp.CecLogLevel.Warning;
-                    break;
-                case MediaPortal.Services.Level.Information:
-                    level = CecSharp.CecLogLevel.Notice;
-                    break;
-                */
-                case MediaPortal.Services.Level.Debug:
-                    level = CecSharp.CecLogLevel.Debug;
-                    break;
-                default:
-                    level = CecSharp.CecLogLevel.None;
-                    break;
-            }
-
-            Log.Info("CecRemote: LibCec log level set to: " + level.ToString());
-
-
-            _client = new CecClient("MediaPortal", _config.CecType, level, (byte)_config.HdmiPort, activateSource);
-
-            _client.CecRemoteKeyEvent += new CecRemoteKeyEventHandler(oCecRemote_CecRemoteKeyEvent);
-            _client.CecRemoteLogEvent += new CecRemoteLogEventHandler(oCecRemote_CecRemoteLogEvent);
-            _client.CecRemoteCommandEvent += new CecRemoteCommandEventHandler(oCecRemote_CecRemoteCommandEvent);
-
-            if (_client.Connect(Defaults.CONNECT_DELAY))
-            {
-                _remoteHandler = new InputHandler("CecRemote");
-                _keyDownTimer = new StopWatch();
-
-                if (_client.getAVRdevice() != null)
-                {
-                    _config.ConnectedTo = CecSharp.CecLogicalAddress.AudioSystem;
-                }
-                
-                if (_config.HdmiPort != 0)
-                {
-                    _client.setHdmiPort(_config.ConnectedTo, _config.HdmiPort);
-                }
-                
-                if (_config.FilterShortPulses)
-                {
-                    _client.setFilterDelay(_config.FilterDelay);
-                }
-
-                _client.setExitCommands(_config.SendInactiveSource, _config.PowerOff);
- 
-                Log.Info("CecRemote: Client connected!");
-
-            }
-            else
-            {
-                Log.Error("CecRemote: Could not connect to CEC-Adapter, check configuration!");
-            }
-        }
-
-
-        private void oCecRemote_CecRemoteKeyEvent(object sender, CecRemoteEventArgs e)
-        {
-            Log.Info("CecRemote: Message from LibCec: KeyEvent start.");
-
-            if (_fastScrolling)
-            {
-                if (_currentKey == _previousKey && _previousKey == (int)e.Key.Keycode)
-                {
-                    if (_keyDown == true && _scrolling == false)
-                    {
-
-                        _scrolling = true;
-                        _keyDownTimer.StartZero();
-                        _repeatCommand = new Thread(new ThreadStart(repeatKey));
-                        _repeatCommand.Start();
-                    }
-                    else if (_keyDown == true && _scrolling == true)
-                    {
-                        
-                        _keyDownTimer.StartZero();
-                    }
-
-                    return;
-                }
-                else
-                {
-                    _remoteHandler.MapAction((int)e.Key.Keycode);
-                    _previousKey = _currentKey;
-                    _currentKey = (int)e.Key.Keycode;
-                    
-                }
-            }
-            else
-            {
-
-                _remoteHandler.MapAction((int)e.Key.Keycode);
-                
-            }
-
-            keybd_event(VK_LSHIFT, 0x2A, 0, 0);
-            keybd_event(VK_LSHIFT, 0xAA, KEYEVENTF_KEYUP, 0);
-             
-        }
-
-        private void oCecRemote_CecRemoteLogEvent(object sender, CecRemoteEventArgs e)
-        {
-            Log.Debug("CecRemote: Message from LibCec: " + e.Message.Message + e.Message.Level.ToString());
-        }
-
-        private void oCecRemote_CecRemoteCommandEvent(object sender, CecRemoteEventArgs e)
-        {
-            Log.Info("CecRemote: Message from LibCec: CommandEvent start.");
-
-            if (e.Command.Opcode == CecSharp.CecOpcode.UserControlPressed)
-            {
-                _keyDown = true;
-            }
-            else if (e.Command.Opcode == CecSharp.CecOpcode.UserControlRelease)
-            {
-                _keyDown = false;
-                _scrolling = false;
-                _currentKey = -1;
-                _previousKey = -1;
-            }
-
-            Log.Info("CecRemote: Message from LibCec: CommandEvent stop.");
-        }
-
-
-        private void repeatKey()
-        {
-            while (_keyDown && _keyDownTimer.ElapsedMilliseconds < _keyDownDelay)
-            {
-                _remoteHandler.MapAction(_currentKey);
-                Thread.Sleep(Defaults.REPEAT_DELAY);
-            }
-
-            _keyDownTimer.Stop();
-            _keyDown = false;
         }
 
         public bool WndProc(ref Message msg)
@@ -381,18 +190,50 @@ namespace CecRemote
                 switch (msg.WParam.ToInt32())
                 {
                     case PBT_APMSUSPEND:
+                        _sleep = true;
+                        
                         Log.Info("CecRemote: PowerControl: System going to sleep, stoppping CEC-client...");
-                        Stop(); //Disconnect
+                        
+                        if (_client != null)
+                        {
+                          _client.OnSleep();
+                        }
+
                         break;
 
                     case PBT_APMRESUMESUSPEND:
-                        Log.Info("CecRemote: PowerControl: User input detected after sleep (APMRESUMESUSPEND), powering on TV...");
-                        connectClient(true); // If client connected already, power on tv (true = power tv)
+                        Log.Info("CecRemote: PowerControl: User input detected after sleep (APMRESUMESUSPEND)");
+                        if (_sleep)
+                        {
+                          _sleep = false;
+
+                          // DeInitialize when resuming to make sure client is prepared properly.
+                          _client.DeInit();
+                          _client = null;
+                          _config = null;
+
+                          PrepareClient();
+                        }
+
+                        _client.OnResumeByUser();
+
                         break;
 
                     case PBT_APMRESUMEAUTOMATIC:
-                        Log.Info("CecRemote: PowerControl: System resuming from sleep (APMRESUMEAUTOMATIC), starting CEC-client...");
-                        connectClient(false); //Connect again when resuming from sleep (false = don't power tv)
+                        Log.Info("CecRemote: PowerControl: System resuming from sleep (APMRESUMEAUTOMATIC)");
+                        if (_sleep)
+                        {
+                          _sleep = false;
+
+                          _client.DeInit();
+                          _client = null;
+                          _config = null;
+
+                          PrepareClient();
+                        }
+
+                        _client.OnResumeByAutomatic();
+                    
                         break;
 
                     default:
@@ -401,6 +242,96 @@ namespace CecRemote
             }
 
             return false; // false = allow other plugins to handle the message
+        }
+
+        private void PrepareClient()
+        {
+          if (_client == null)
+          {
+            _client = new CecRemoteClient();
+          }
+          if (_config == null)
+          {
+            _config = new CecConfig();
+            
+            try
+            {
+              _config.ReadConfig();
+              _client.SetConfig(_config);
+            }
+            catch (Exception ex)
+            {
+              Log.Debug("CecRemote: Error while reading config. " + ex.ToString());
+              // Defaults will be used automatically if config reading fails, so we can still try to connect.
+            }
+          }
+        }
+
+        public void MPEI_OnConfigurationChanged(string guid)
+        {
+          // Check if message is for us
+          if (guid == this.Guid)
+          {
+            Log.Debug("CecRemote: Settings changed from Extensions plugin, updating configuration.");
+
+            _config = null;
+            PrepareClient();
+
+            _client.LoadConfig();
+          }
+        }
+
+        private void LoadTranslations()
+        {
+          Log.Debug("CecRemote: Loading translated strings for MPEI settings.");
+
+          string lang = "";
+
+          try
+          {
+            lang = GUILocalizeStrings.GetCultureName(GUILocalizeStrings.CurrentLanguage());
+          }
+          catch (Exception)
+          {
+            Log.Debug("CecRemote: Unable to detect current language. Using English.");
+            lang = this.DefaultLanguage;
+          }
+
+          Log.Debug("CecRemote: MPEI settings language set to " + lang);
+
+          XmlDocument xmlTranslation = new XmlDocument();
+
+          for (short i = 0; i < 2; ++i)
+          {
+            try
+            {
+              string path = Path.Combine(Config.GetSubFolder(Config.Dir.Language, "CecRemote"), lang + ".xml");
+              xmlTranslation.Load(path);
+            }
+            catch
+            {
+              Log.Debug("CecRemote: Could not open translation file for langueage: {0}. Loading default language: {1}", lang, DefaultLanguage);
+              lang = this.DefaultLanguage;
+              continue;
+            }
+            break;
+          }
+
+          foreach (XmlNode node in xmlTranslation.DocumentElement.ChildNodes)
+          {
+            if (node.NodeType == XmlNodeType.Element)
+            {
+              try
+              {
+                GUIPropertyManager.SetProperty("#CecRemote.Translation." + node.Attributes.GetNamedItem("name").Value + ".Label", node.InnerText);
+              }
+              catch (Exception ex)
+              {
+                Log.Error("CecRemote: Error while loading translations. Translation string missing or invalid. " + ex.Message);
+              }
+            }
+          }
+
         }
     }
 }

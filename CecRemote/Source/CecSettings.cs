@@ -15,353 +15,250 @@
 
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.Threading;
+using System.Reflection;
 using CecSharp;
-using MediaPortal.Profile;
 using MediaPortal.GUI.Library;
 using MediaPortal.InputDevices;
-using MediaPortal.InputDevices.FireDTV;
-using MediaPortal.Configuration;
-using MediaPortal.UserInterface.Controls;
+using CecRemote.Base;
 
 namespace CecRemote
 {
-    public partial class CecSettings : Form
+
+
+  public partial class CecSettings : Form
+  {
+    public CecConfig _config;
+
+    
+    public CecSettings()
     {
-        private CecClient _client;
-        private CecConfig _config;
-
-        public CecSettings()
-        {
-
-            InitializeComponent();
-
-            // Read MediaPortal config 
-            _config = new CecConfig();
-            _config.ReadConfig(Defaults.CONFIG);
-
-            // Set values for controls
-            setControls();
-
-            // Start connecting worker
-            backgroundWorkerConnect.DoWork += new DoWorkEventHandler(backgroundWorkerConnect_DoWork);
-            backgroundWorkerConnect.ProgressChanged += new ProgressChangedEventHandler(backgroundWorkerConnect_ProgressChanged);
-            backgroundWorkerConnect.RunWorkerCompleted += new RunWorkerCompletedEventHandler(backgroundWorkerConnect_RunWorkerCompleted);
-
-            backgroundWorkerConnect.RunWorkerAsync();
-
-        }
-
-        private void buttonClose_Click(object sender, EventArgs e)
-        {
-            if (_client != null)
-            {
-                _client.Close();
-            }
-
-            this.Close();
-        }
-
-        private void setControls()
-        {
-            try
-            {
-                numericUpDownHdmi.Value = _config.HdmiPort;
-                numericUpDownFilter.Value = _config.FilterDelay;
-                numericUpDownFilter.Enabled = _config.FilterShortPulses;
-                checkBoxIgnoreShortPulses.Checked = _config.FilterShortPulses;
-                checkBoxFastScrolling.Checked = _config.FastScrolling;
-                checkBoxInactiveSource.Checked = _config.SendInactiveSource;
-                checkBoxPowerOff.Checked = _config.PowerOff;
-                comboBoxDeviceType.SelectedItem = _config.CecType.ToString();
-            }
-            catch
-            {
-                Log.Error("CecRemote: Could not set config values to dialog, using defaults.");
-            }
-
-        }
-
-
-        private void backgroundWorkerConnect_DoWork(object sender, DoWorkEventArgs e)
-        {
-            _client = new CecClient("Settings", _config.CecType, CecSharp.CecLogLevel.All, (byte)_config.HdmiPort);
-            _client.CecRemoteKeyEvent += new CecRemoteKeyEventHandler(oCecRemote_CecRemoteEvent);
-
-            backgroundWorkerConnect.ReportProgress(10);
-
-            backgroundWorkerConnect.ReportProgress(20);
-
-            if (_client.Connect(Defaults.CONNECT_DELAY))
-            {
-                // Set filter delay
-                _client.setFilterDelay(_config.FilterDelay);
-
-                // Send connected
-                backgroundWorkerConnect.ReportProgress(30, "Connected=1");
-                
-                // Send firmware version
-                string value = _client.getFirmwareVersion().ToString();
-                backgroundWorkerConnect.ReportProgress(40, "Firmware=" + value);
-                
-                // Send Hdmi port
-                if (_client.getHdmiAutodetectStatus())
-                {
-                    backgroundWorkerConnect.ReportProgress(50, "HDMIPort=" + "Autodetected");
-                }
-                else
-                {
-                    backgroundWorkerConnect.ReportProgress(50, "HDMIPort=" + _config.HdmiPort);
-                }
-               
-                // Send TV vendor
-                value = _client.getTvVendor();
-                backgroundWorkerConnect.ReportProgress(70, "TVVendor=" + value);
-           
-                value = _client.getAVRdevice();
-                
-                if (value == null)
-                { value = "AVR=No"; }
-                else
-                { 
-                    value = "AVR=" + value;
-                    _config.ConnectedTo = CecLogicalAddress.AudioSystem;
-
-                }
-
-                backgroundWorkerConnect.ReportProgress(80, value);
-
-                if (_config.HdmiPort != 0)
-                {
-                    _client.setHdmiPort(_config.ConnectedTo, _config.HdmiPort);
-                }
-
-                backgroundWorkerConnect.ReportProgress(90, "Lib=" + _client.getLibVersion());
-
-
-            }
-            else
-            {
-                backgroundWorkerConnect.ReportProgress(90, "Connected=0");
-            }
-
-        }
-
-
-        private void backgroundWorkerConnect_ProgressChanged(object sender, ProgressChangedEventArgs e)
-	    {
-	       progressBarConnect.Value = e.ProgressPercentage;
-
-           if (e.UserState != null)
-           {
-               string[] state = ((string)e.UserState).Split('=');
-
-               switch (state[0])
-               {
-                   case "Connected":
-                       if (state[1] == "1")
-                       {
-                           labelAdapterStatusValue.Text = "Connected";
-                       }
-                       else
-                       {
-                           this.setInfoLabels(string.Empty);
-                           labelAdapterStatusValue.Text = "No device";
-                       }
-                       break;
-
-                   case "Firmware":
-                       labelFirmwareValue.Text = state[1];
-                       break;
-
-                   case "HDMIPort":
-                       if (state[1] == "0")
-                       {
-                           labelHdmiPortValue.Text = "Set manually!";
-                       }
-                       else
-                       {
-                           labelHdmiPortValue.Text = state[1];
-                       }
-                       break;
-
-                   case "TVVendor":
-                       labelTvVendorValue.Text = state[1];
-                       break;
-
-                   case "AVR":
-                       if (state[1] == "No")
-                       {
-                           labelAvrConnectedValue.Text = "No device";
-                           labelAvrVendor.Hide();
-                           labelAvrVendorValue.Hide();
-                       }
-                       else
-                       {
-                           labelAvrConnectedValue.Text = "Connected";
-                           labelAvrVendorValue.Text = state[1];
-                           labelAvrVendor.Show();
-                           labelAvrVendorValue.Show();
-                       }
-                       break;
-
-                   default:
-                       break;
-               
-               }
-       
-           }
-        }
-
-
-        private void backgroundWorkerConnect_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-
-            progressBarConnect.Hide();
-            buttonRefresh.Enabled = true;
-            tabControl1.Enabled = true;
-        }
-
-        private void buttonRefresh_Click(object sender, EventArgs e)
-        {
-            buttonRefresh.Enabled = false;
-            tabControl1.Enabled = false;
-
-            if (_client != null)
-            {
-                _client.Close();
-            }
-
-            this.setInfoLabels("Updating...");
-
-            progressBarConnect.Value = 5;
-            progressBarConnect.Show();
-
-            backgroundWorkerConnect.RunWorkerAsync();
-        }
-
-        private void checkBoxIgnoreShortPulses_CheckedChanged(object sender, EventArgs e)
-        {
-            if (checkBoxIgnoreShortPulses.Checked == true)
-            {
-                numericUpDownFilter.Enabled = true;
-            }
-            else
-            {
-                numericUpDownFilter.Enabled = false;
-            }
-
-        }
-
-        private void buttonSaveSettings_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                _config.HdmiPort = (int)numericUpDownHdmi.Value;
-                _config.CecType = (CecSharp.CecDeviceType)Enum.Parse(typeof(CecSharp.CecDeviceType), comboBoxDeviceType.SelectedItem.ToString());
-                _config.FastScrolling = checkBoxFastScrolling.Checked;
-                _config.FilterShortPulses = checkBoxIgnoreShortPulses.Checked;
-                _config.SendInactiveSource = checkBoxInactiveSource.Checked;
-                _config.PowerOff = checkBoxPowerOff.Checked;
-                _config.FilterDelay = (int)numericUpDownFilter.Value;
-
-                _config.WriteConfig(Defaults.CONFIG);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Configuration save failed!" + ex.Message.ToString());
-            }
-
-            // Refresh connection
-            this.buttonRefresh_Click(sender, e);
-        }
-
-        private void buttonMapping_Click(object sender, EventArgs e)
-        {
-            // Open MediaPortal mapping form
-            InputMappingForm mappings = new InputMappingForm("CecRemote");
-            mappings.ShowDialog(this);
-        }
-
-
-        private void oCecRemote_CecRemoteEvent(object sender, CecRemoteEventArgs e)
-        {
-            if (this.InvokeRequired)
-            {
-                BeginInvoke(new MethodInvoker(delegate() { oCecRemote_CecRemoteEvent(sender, e); }));
-                return;
-            }
-
-            // Save keypress only if "Test" -tab is active
-            if (tabControl1.SelectedIndex != 2)
-            {
-                return;
-            }
-
-            labelTest.Hide();
-
-            // Add new keypress to listview
-            string[] listItem = new string[3];
-            listItem[0] = ((int)e.Key.Keycode).ToString();
-            listItem[1] = e.Key.Keycode.ToString();
-
-            ListViewItem lvi = new ListViewItem(listItem);
-            listViewTestKeys.Items.Insert(0, lvi);
-
-            labelTest.Show();
-
-
-        }
-
-        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            // Copy selected listview text to clipboard
-
-            if (listViewTestKeys.SelectedItems.Count == 0)
-            { return; }
-
-            StringBuilder buffer = new StringBuilder();
-            foreach (ListViewItem currentItem in listViewTestKeys.SelectedItems)
-            {
-                foreach (ListViewItem.ListViewSubItem sub in currentItem.SubItems)
-                {
-                    buffer.Append(sub.Text);
-                    buffer.Append("\t");
-                }
-
-                buffer.Remove(buffer.Length - 1, 1);
-                buffer.Append("\r\n");
-            }
-
-            Clipboard.SetText(buffer.ToString());
-
-        }
-
-        private void setInfoLabels(string labelText)
-        {
-            labelAdapterStatusValue.Text = labelText;
-            labelFirmwareValue.Text = labelText;
-            labelHdmiPortValue.Text = labelText;
-            labelTvVendorValue.Text = labelText;
-            labelAvrConnectedValue.Text = labelText;
-            labelAvrVendorValue.Text = labelText;
-        }
-
-
-        private void CecSettings_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (_client != null)
-            {
-                _client.Close();
-                _client = null;
-            }
-        }
+      // Read MediaPortal config 
+      _config = new CecConfig();
+
+      try
+      {
+        _config.ReadConfig();
+      }
+      catch (Exception exp)
+      {
+        MessageBox.Show("Error while reading configuration from MediaPortal.xml" + exp.ToString());
+      }
+
+      InitializeComponent();
+
+      AddBindings();
+      
     }
+
+    private void AddBindings()
+    {
+      numericUpDownHdmi.DataBindings.Add("Value", _config, "HdmiPort");
+      textBoxOsd.DataBindings.Add("Text", _config, "OsdName");
+      checkBoxFastScrolling.DataBindings.Add("Checked", _config, "FastScrolling");
+      trackBarRepeatDelay.DataBindings.Add("Value", _config, "FastScrollingRepeatDelay");
+      trackBarRepeatRate.DataBindings.Add("Value", _config, "FastScrollingRepeatRate");
+      checkBoxRequireDelayBetweenKeys.DataBindings.Add("Checked", _config, "RequireDelayBetweenKeys");
+      numericUpDownRequireDelay.DataBindings.Add("Value", _config, "DelayBetweenKeys");
+      checkBoxTerminateScreensaver.DataBindings.Add("Checked", _config, "DisableScreensaver");
+      checkBoxExtensiveLogging.DataBindings.Add("Checked", _config, "ExtensiveLogging");
+      checkBoxWakeDevicesOnStart.DataBindings.Add("Checked", _config, "WakeDevicesOnStart");
+      checkBoxStandbyOnExit.DataBindings.Add("Checked", _config, "StandbyDevicesOnExit");
+      checkBoxWakeDevicesOnResume.DataBindings.Add("Checked", _config, "WakeDevicesOnResume");
+      checkBoxStandbyOnSleep.DataBindings.Add("Checked", _config, "StandbyDevicesOnSleep");
+      checkBoxSetActiveSourceOnStart.DataBindings.Add("Checked", _config, "ActivateSourceOnStart");
+      checkBoxSetInactiveSourceOnExit.DataBindings.Add("Checked", _config, "InactivateSourceOnExit");
+      checkBoxSetActiveSourceOnResume.DataBindings.Add("Checked", _config, "ActivateSourceOnResume");
+      checkBoxSetInactiveSourceOnSleep.DataBindings.Add("Checked", _config, "InactivateSourceOnSleep");
+
+      // Handle comboboxes separately
+
+      comboBoxDeviceType.SelectedItem = _config.DeviceType.ToString();
+      comboBoxConnectedTo.SelectedItem = _config.ConnectedTo.ToString();
+
+    }
+
+    private void ResetBindings(Control ctl)
+    {
+      // Remove all bindings (for reset)
+
+      foreach (Control c in ctl.Controls)
+      {
+        if (c.Controls.Count > 0)
+        {
+          ResetBindings(c);
+        }
+
+        if (c is TextBox || c is NumericUpDown || c is CheckBox || c is TrackBar)
+        {
+          c.DataBindings.Clear();
+         // c.ResetText();
+        }
+      }
+    }
+
+
+    private void buttonClose_Click(object sender, EventArgs e)
+    {
+
+      this.Close();
+    }
+
+
+    private void buttonMapping_Click(object sender, EventArgs e)
+    {
+      // Open MediaPortal mapping form
+      InputMappingForm mappings = new InputMappingForm("CecRemote");
+      mappings.ShowDialog(this);
+    }
+
+
+   
+    private void ShowSelectDevices(CecLogicalAddresses list)
+    {
+
+      SelectDevices sel = new SelectDevices();
+      sel.StartPosition = FormStartPosition.CenterParent;
+
+      foreach (PropertyInfo property in sel.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+      {
+        if (property.CanWrite && property.PropertyType.Equals(typeof(System.Boolean)))
+        {
+          property.SetValue(sel, false, null);
+          if (list.IsSet((CecLogicalAddress)Enum.Parse(typeof(CecLogicalAddress), property.Name, true)))
+          {
+            property.SetValue(sel, true, null);
+          }
+        }
+      }
+
+      if (sel.ShowDialog(this) == DialogResult.OK)
+      {
+        list.Clear();
+
+        foreach (PropertyInfo property in sel.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+        {
+          if (property.CanRead && property.PropertyType.Equals(typeof(System.Boolean)))
+          {
+            if ((bool)property.GetValue(sel, null))
+            {
+              list.Set((CecLogicalAddress)Enum.Parse(typeof(CecLogicalAddress), property.Name, true));
+            }
+          }
+        }
+
+        sel = null;
+      }
+    }
+
+    private void buttonSelectDevicesOnStart_Click(object sender, EventArgs e)
+    {
+      ShowSelectDevices(_config.OnStartWakeDevices);
+    }
+
+
+    private void buttonSelectDevicesOnStandby_Click(object sender, EventArgs e)
+    {
+      ShowSelectDevices(_config.OnExitStandbyDevices);
+    }
+
+    private void buttonSelectDevicesOnResume_Click(object sender, EventArgs e)
+    {
+      ShowSelectDevices(_config.OnResumeWakeDevices);
+    }
+
+    private void buttonSelectDevicesOnSleep_Click(object sender, EventArgs e)
+    {
+      ShowSelectDevices(_config.OnSleepStandbyDevices);
+    }
+
+    private void buttonSaveSettings_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        _config.WriteConfig();
+      }
+      catch(Exception exp)
+      {
+        MessageBox.Show("Error while writing configuration to MediaPortal.xml" + exp.ToString() );
+      }
+
+      this.Close();
+
+    }
+
+    private void checkBoxFastScrolling_CheckedChanged(object sender, EventArgs e)
+    {
+
+      trackBarRepeatDelay.Enabled = checkBoxFastScrolling.Checked;
+      trackBarRepeatRate.Enabled = checkBoxFastScrolling.Checked;
+
+    }
+
+    private void checkBoxRequireDelayBetweenKeys_CheckedChanged(object sender, EventArgs e)
+    {
+      numericUpDownRequireDelay.Enabled = checkBoxRequireDelayBetweenKeys.Checked;
+    }
+
+    private void buttonRestoreDefaults_Click(object sender, EventArgs e)
+    {
+      
+      DialogResult result = MessageBox.Show("This will change all your settings to default values.\n Button mappings will still remain unchanged.\n\nReset to defaults?", "Reset to defaults",
+        MessageBoxButtons.YesNo);
+
+      if (result == DialogResult.Yes)
+      {
+        _config.SetDefaults();
+        ResetBindings(this);
+        AddBindings();
+      }
+
+    }
+
+    private void comboBoxDeviceType_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      try
+      {
+        _config.DeviceType = (CecDeviceType)Enum.Parse(typeof(CecDeviceType), comboBoxDeviceType.SelectedItem.ToString());
+      }
+      catch (Exception ex)
+      {
+        Log.Error("Could not set selected device type. Illegal value? " + ex.ToString());
+      }
+
+    }
+
+    private void comboBoxConnectedTo_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      try
+      {
+        _config.ConnectedTo = (CecLogicalAddress)Enum.Parse(typeof(CecLogicalAddress), comboBoxConnectedTo.SelectedItem.ToString());
+      }
+      catch (Exception ex)
+      {
+        Log.Error("Could not set connected device type. Illegal value? " + ex.ToString());
+      }
+    }
+
+    private void buttonAdvancedPower_Click(object sender, EventArgs e)
+    {
+      AdvancedPower pow = new AdvancedPower();
+      pow.StartPosition = FormStartPosition.CenterParent;
+
+      pow.RequireUser = _config.RequireUserInputOnResume;
+      pow.SendTvPower = _config.SendTvPowerOff;
+      pow.SendTvPowerOffOnlyIfActiveSource = _config.SendTvPowerOffOnlyIfActiveSource;
+
+      if (pow.ShowDialog(this) == DialogResult.OK)
+      {
+        _config.RequireUserInputOnResume = pow.RequireUser;
+        _config.SendTvPowerOff = pow.SendTvPower;
+        _config.SendTvPowerOffOnlyIfActiveSource = pow.SendTvPowerOffOnlyIfActiveSource;
+      }
+
+      pow = null;
+    }
+
+  }
 }
