@@ -1,31 +1,47 @@
 CECREMOTE - Changelog
 
+0.9.0 (beta)
+
+*+ Different settings for device wakeup/standby for different events (start, stop, sleep, resume)
+*+ Detect wake up by wake-up timer (powerscheduler) and allow users to set if devices should wake up
+*+ Rework of settings form
+*+ Setting to disable/enable some logging
+*+ Settings to change fast scrolling repeat rate and delay
+*+ Extensions plugin support for MediaPortal to change settings without leaving GUI
+*+ TvPowerOff virtual button, when tv is switched off
+*+ Setting to send TvPowerOff only if client is active source
+*+ Support for setting base device manually (if autodetect fails)
+*+ Disbale screensaver when button is pressed
+
+*change Test tab completely removed from settings, use up-to-date debugging tools instead
+*change Libcec version update (2.0.5)
+
 0.8.3
 
-*fix 	combo key problems solved with custom libcec 2.0.4 for now
-*change	key duration values removed from test tab
-*change	double tap filtering done differently on client side, users now set desired timeout between key presses
+*fix 	Combo key problems solved with custom libcec 2.0.4 for now
+*change	Key duration values removed from test tab
+*change	Double tap filtering done differently on client side, users now set desired timeout between key presses
 
 0.8.2
 
-*fix interface now compatible with libcec 2.x (2.0.2 included)
-*fix numeric up-down for filter delay not enabled after selection
-*fix random crashing after resuming from sleep/hibernate
-*fix setting AVR manually as active source crashes plugin (removed, now automatically set)
+*fix Interface now compatible with libcec 2.x (2.0.2 included)
+*fix Numeric up-down for filter delay not enabled after selection
+*fix Random crashing after resuming from sleep/hibernate
+*fix Setting AVR manually as active source crashes plugin (removed, now automatically set)
 
 0.8.2 (alpha)
 
-*+ filtering for short pulses (to prevent double key strokes)
-*+ option to shutdown TV when MP stops
-*+ option to power on TV when MP starts
+*+ Filtering for short pulses (to prevent double key strokes)
+*+ Option to shutdown TV when MP stops
+*+ Option to power on TV when MP starts
 
-*fix null reference problem after reconnect
+*fix Null reference problem after reconnect
 
 
 0.8.1 (beta)
 
-*+ setting for device type
-*+ custom keymap settings
-*+ initial version of fastscrolling feature
+*+ Setting for device type
+*+ Custom keymap settings
+*+ Initial version of fastscrolling feature
 
-*fix re-connection issue after sleep/hibernate
+*fix Re-connection issue after sleep/hibernate
