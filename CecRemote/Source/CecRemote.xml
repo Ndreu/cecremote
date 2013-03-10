@@ -8,7 +8,6 @@
 			<action layer="0" condition="WINDOW" conproperty="2007" command="ACTION" cmdproperty="31" sound="click.wav" />
 			<action layer="0" condition="WINDOW" conproperty="2005" command="ACTION" cmdproperty="22" />
 			<action layer="0" condition="WINDOW" conproperty="602" command="ACTION" cmdproperty="22" />
-			<action layer="0" condition="WINDOW" conproperty="4758" command="ACTION" cmdproperty="22" sound="cursor.wav" />
 			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="3" />
 		</button>
 		<button name="Down" code="2">
@@ -24,6 +23,7 @@
 			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="2" sound="click.wav" />
 		</button>
 		<button name="RootMenu" code="9">
+			<action layer="0" condition="PLAYER" conproperty="DVD" command="ACTION" cmdproperty="90" />
 			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="115" sound="click.wav" focus="True" />
 		</button>
 		<button name="SetupMenu" code="10">
@@ -201,9 +201,17 @@
 		<button name="SamsungReturn" code="145">
 			<action layer="0" condition="*" conproperty="-1" command="ACTION" cmdproperty="10" sound="back.wav" />
 		</button>
+	</remote>
+	<remote family="Virtual buttons">
 		<button name="TVPowerOff" code="108">
 			<action layer="0" condition="PLAYER" conproperty="MEDIA" command="ACTION" cmdproperty="12" />
 			<action layer="0" condition="*" conproperty="-1" command="POWER" cmdproperty="STANDBY" sound="back.wav" />
+		</button>
+		<button name="Source activated" code="310">
+			<action layer="0" condition="PLAYER" conproperty="MEDIA" command="ACTION" cmdproperty="68" sound="cursor.wav" focus="True" />
+		</button>
+		<button name="Source deactivated" code="311">
+			<action layer="0" condition="PLAYER" conproperty="MEDIA" command="ACTION" cmdproperty="12" sound="cursor.wav" />
 		</button>
 	</remote>
 </mappings>

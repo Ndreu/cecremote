@@ -151,7 +151,7 @@ namespace CecRemote.Base
       OnSleepStandbyDevices.Set(CecLogicalAddress.Tv);
       OnSleepStandbyDevices.Set(CecLogicalAddress.AudioSystem);
 
-      ClientVersion = CecClientVersion.Version2_0_3;
+      ClientVersion = CecClientVersion.Version2_1_0;
       ConnectedTo = CecLogicalAddress.Tv;
 
       SendTvPowerOff = false;

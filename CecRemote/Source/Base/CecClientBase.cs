@@ -22,6 +22,8 @@ using CecSharp;
 
 namespace CecRemote.Base
 {
+
+
   public class CecClientBase : CecCallbackMethods
   {
 
@@ -73,7 +75,7 @@ namespace CecRemote.Base
       _keyDown = false;
       _keyCount = 0;
       _currentKeycode = 0;
-      _wakeUpByAutoEvent = true; // Assume that user is not present when starting. Set to false after user input.
+      _wakeUpByAutoEvent = true; // Assume that user is not present. Set to false after user input.
 
       _currentButton = new CecKeypress(CecUserControlCode.Unknown, 0);
 
@@ -139,7 +141,7 @@ namespace CecRemote.Base
         _libConfig.ClientVersion = _cecConfig.ClientVersion;
         _libConfig.WakeDevices.Clear();
         _libConfig.PowerOffDevices.Clear();
-        //_libConfig.PhysicalAddress = 0;
+        _libConfig.PhysicalAddress = 0;
         _libConfig.ActivateSource = false;  // Control this manually based on settings.
         _libConfig.HDMIPort = (byte)_cecConfig.HdmiPort;
         _libConfig.BaseDevice = _cecConfig.ConnectedTo;
@@ -310,8 +312,7 @@ namespace CecRemote.Base
 
     public bool OnStart()
     {
-      _wakeUpByAutoEvent = false;
-
+     
       lock (_connectLock)
       {
         // If lib is not created, it needs to be initialized first.
@@ -340,6 +341,8 @@ namespace CecRemote.Base
         {
           SetSource(true);
         }
+
+        _wakeUpByAutoEvent = false;
       }
 
       return true;
@@ -401,8 +404,6 @@ namespace CecRemote.Base
 
     public void OnResumeByUser()
     {
-      _wakeUpByAutoEvent = false;
-
       lock (_connectLock)
       {
 
@@ -424,7 +425,7 @@ namespace CecRemote.Base
             SetSource(true);
           }
         }
-
+        _wakeUpByAutoEvent = false;
       }
     }
 
@@ -529,6 +530,7 @@ namespace CecRemote.Base
           }
         }
       }
+
 
       if (_extensiveLogging)
       {
@@ -668,11 +670,11 @@ namespace CecRemote.Base
 
       if (activated)
       { // MediaPortal becomes active source
-        KeyPress(301);
+        KeyPress(310);
       }
       else
       { // MediaPortal was deactivated
-        KeyPress(302);
+        KeyPress(311);
       }
     }
 

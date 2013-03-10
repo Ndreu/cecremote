@@ -16,7 +16,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using MediaPortal.GUI.Library;
+using MediaPortal.Dialogs;
 using MediaPortal.InputDevices;
 using CecRemote.Base;
 
@@ -24,6 +26,8 @@ namespace CecRemote
 {
   public class CecRemoteClient : CecClientBase
   {
+    private delegate bool ShowCustomYesNoDialogDelegate(string heading, string lines, string yesLabel, string noLabel, bool defaultYes);
+       
 
     private InputHandler _remoteHandler;
 
@@ -51,12 +55,6 @@ namespace CecRemote
         Log.Info("CecRemote: Received unmapped button with code: " + keycode.ToString());
       }
     }
-
-    protected override void WriteLog(string message)
-    {
-      Log.Debug("CecRemote: " + message);
-    } 
-
   }
 
 }

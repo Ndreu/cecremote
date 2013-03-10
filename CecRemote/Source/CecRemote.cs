@@ -141,8 +141,6 @@ namespace CecRemote
            
 
           // Try to subscribe to Extensions plugin update event.
-          // This is potentially flaky if Extensions plugin is not loaded yet,
-          // but windowplugins are loaded first, so it should work OK.
 
           try
           {
@@ -261,7 +259,7 @@ namespace CecRemote
             }
             catch (Exception ex)
             {
-              Log.Debug("CecRemote: Error while reading config. " + ex.ToString());
+              Log.Error("CecRemote: Error while reading config. " + ex.ToString());
               // Defaults will be used automatically if config reading fails, so we can still try to connect.
             }
           }
