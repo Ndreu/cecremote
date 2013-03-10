@@ -1,5 +1,16 @@
 CECREMOTE - Changelog
 
+0.9.1
+
+*+ Added two new virtual buttons source activated and source deactivated
+*+ Lock access to libcec when connecting/disconnecting 
+*+ Separate categories for actual and virtual buttons in mappings form
+
+*change Libcec version update (2.1.0)
+
+*fix Prevent occasional double connection attempts after computer resumes from sleep
+*fix Button repeat for Philips TVs (double presses can be prevented with "require delay between keys" -setting)
+
 0.9.0 (beta)
 
 *+ Different settings for device wakeup/standby for different events (start, stop, sleep, resume)
