@@ -26,6 +26,12 @@ namespace CecRemote
       set { checkBoxRequireUser.Checked = value; }
     }
 
+    public bool RequireActiveSource
+    {
+      get { return checkBoxRequireActiveSource.Checked; }
+      set { checkBoxRequireActiveSource.Checked = value; }
+    }
+
     public bool SendTvPower
     {
       get { return checkBoxSendTvPower.Checked; }

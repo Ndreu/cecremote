@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.IO;
 using System.Xml;
 using System.Reflection;
@@ -31,13 +32,23 @@ namespace CecRemote
     [PluginIcons("CecRemote.Resources.cecremotelogo.png", "CecRemote.Resources.cecremotelogo_disabled.png")]
     public class CecRemote : ISetupForm, IPlugin, IPluginReceiver
     {
+        // Structure of PBT_POWERBROADCAST_SETTING (away mode detection)
+        [StructLayout(LayoutKind.Sequential, Pack = 4)]
+        internal struct POWERBROADCAST_SETTING
+        {
+            public Guid PowerSetting;
+            public uint DataLength;
+            public byte Data;
+        }
 
         #region wm_powerconstants
 
         private const int WM_POWERBROADCAST = 0x0218;
-        const int PBT_APMSUSPEND = 0x0004;
-        const int PBT_APMRESUMEAUTOMATIC = 0x0012;
-        const int PBT_APMRESUMESUSPEND = 0x0007;
+        private const int PBT_APMSUSPEND = 0x0004;
+        private const int PBT_APMRESUMEAUTOMATIC = 0x0012;
+        private const int PBT_APMRESUMESUSPEND = 0x0007;
+        private const int PBT_POWERSETTINGCHANGE = 0x8013;
+        private static Guid GUID_SYSTEM_AWAYMODE = new Guid("98a7f580-01f7-48aa-9c0f-44352c29e5C0");
         #endregion
 
         #region members
@@ -200,39 +211,45 @@ namespace CecRemote
                         break;
 
                     case PBT_APMRESUMESUSPEND:
+                        
                         Log.Info("CecRemote: PowerControl: User input detected after sleep (APMRESUMESUSPEND)");
-                        if (_sleep)
-                        {
-                          _sleep = false;
-
-                          // DeInitialize when resuming to make sure client is prepared properly.
-                          _client.DeInit();
-                          _client = null;
-                          _config = null;
-
-                          PrepareClient();
-                        }
-
-                        _client.OnResumeByUser();
+                        HandleResume(false);
 
                         break;
 
                     case PBT_APMRESUMEAUTOMATIC:
+                        
                         Log.Info("CecRemote: PowerControl: System resuming from sleep (APMRESUMEAUTOMATIC)");
-                        if (_sleep)
-                        {
-                          _sleep = false;
-
-                          _client.DeInit();
-                          _client = null;
-                          _config = null;
-
-                          PrepareClient();
-                        }
-
-                        _client.OnResumeByAutomatic();
+                        HandleResume(true);
                     
                         break;
+                  
+                        // Handle awaymode
+                      case PBT_POWERSETTINGCHANGE:
+
+                        POWERBROADCAST_SETTING ps = (POWERBROADCAST_SETTING)Marshal.PtrToStructure(msg.LParam, typeof(POWERBROADCAST_SETTING));
+
+                        if (ps.PowerSetting == GUID_SYSTEM_AWAYMODE)
+                        {
+                            if (ps.Data == 0)
+                            {
+                                Log.Info("CecRemote: PowerControl: System exiting away mode");
+                                HandleResume(false);
+                            }
+                            else
+                            {
+                                Log.Info("CecRemote: PowerControl: System entering to away mode");
+                                _sleep = true;
+
+                                if (_client != null)
+                                {
+                                    _client.OnAwayMode();
+                                }
+                            }
+                        }
+
+                        break;
+
 
                     default:
                         break;
@@ -240,6 +257,30 @@ namespace CecRemote
             }
 
             return false; // false = allow other plugins to handle the message
+        }
+
+        private void HandleResume(bool automatic)
+        {
+           
+            if (_sleep)
+            {
+                _sleep = false;
+
+                // DeInitialize when resuming to make sure client is prepared properly.
+                _client.DeInit();
+                _client = null;
+                _config = null;
+
+                PrepareClient();
+            }
+            if (automatic)
+            {
+                _client.OnResumeByAutomatic();
+            }
+            else
+            {
+                _client.OnResumeByUser();
+            }
         }
 
         private void PrepareClient()

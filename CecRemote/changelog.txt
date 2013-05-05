@@ -1,5 +1,12 @@
 CECREMOTE - Changelog
 
+0.9.2
+
+*+ Support for away mode
+*+ Option to disable turning off devices if Media Portal is not the active source, when entering sleep
+
+*change Libcec version update (2.1.1)
+
 0.9.1
 
 *+ Added two new virtual buttons source activated and source deactivated

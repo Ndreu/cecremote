@@ -66,6 +66,7 @@ namespace CecRemote
           ConnectedTo = (CecSharp.CecLogicalAddress)Enum.Parse(typeof(CecSharp.CecLogicalAddress), (reader.GetValueAsString("CecRemote", "ConnectedTo", base.ConnectedTo.ToString())), true);
           SendTvPowerOff = reader.GetValueAsBool("CecRemote", "SendTvPowerOff", base.SendTvPowerOff);
           SendTvPowerOffOnlyIfActiveSource = reader.GetValueAsBool("CecRemote", "SendTvPowerOffOnlyIfActiveSource", base.SendTvPowerOffOnlyIfActiveSource);
+          RequireActiveSourceWhenSleep = reader.GetValueAsBool("CecRemote", "RequireActiveSourceWhenSleep", base.RequireActiveSourceWhenSleep);
 
         }
       }
@@ -109,6 +110,7 @@ namespace CecRemote
             writer.SetValue("CecRemote", "ConnectedTo", base.ConnectedTo.ToString());
             writer.SetValueAsBool("CecRemote", "SendTvPowerOff", base.SendTvPowerOff);
             writer.SetValueAsBool("CecRemote", "SendTvPowerOffOnlyIfActiveSource", base.SendTvPowerOffOnlyIfActiveSource);
+            writer.SetValueAsBool("CecRemote", "RequireActiveSourceWhenSleep", base.RequireActiveSourceWhenSleep);
           }
       }
       catch (Exception ex)

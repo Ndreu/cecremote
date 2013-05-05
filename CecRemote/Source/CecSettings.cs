@@ -247,12 +247,14 @@ namespace CecRemote
       pow.StartPosition = FormStartPosition.CenterParent;
 
       pow.RequireUser = _config.RequireUserInputOnResume;
+      pow.RequireActiveSource = _config.RequireActiveSourceWhenSleep;
       pow.SendTvPower = _config.SendTvPowerOff;
       pow.SendTvPowerOffOnlyIfActiveSource = _config.SendTvPowerOffOnlyIfActiveSource;
 
       if (pow.ShowDialog(this) == DialogResult.OK)
       {
         _config.RequireUserInputOnResume = pow.RequireUser;
+        _config.RequireActiveSourceWhenSleep = pow.RequireActiveSource;
         _config.SendTvPowerOff = pow.SendTvPower;
         _config.SendTvPowerOffOnlyIfActiveSource = pow.SendTvPowerOffOnlyIfActiveSource;
       }

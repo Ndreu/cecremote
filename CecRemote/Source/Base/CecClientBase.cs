@@ -388,6 +388,16 @@ namespace CecRemote.Base
 
         _lib.DisableCallbacks();
 
+        if (_cecConfig.RequireActiveSourceWhenSleep)
+        {
+            if(!_lib.IsLibCECActiveSource())
+            {
+                DeInit();
+                return;
+            }
+        }
+            
+
         if (_cecConfig.InactivateSourceOnSleep)
         {
           SetSource(false);
@@ -400,6 +410,34 @@ namespace CecRemote.Base
         
         DeInit();
       }
+    }
+
+    public void OnAwayMode()
+    {
+        lock (_connectLock)
+        {
+
+            _wakeUpByAutoEvent = true;
+
+
+            if (_cecConfig.RequireActiveSourceWhenSleep)
+            {
+                if (!_lib.IsLibCECActiveSource())
+                {
+                    return;
+                }
+            }
+
+            if (_cecConfig.InactivateSourceOnSleep)
+            {
+                SetSource(false);
+            }
+
+            if (_cecConfig.StandbyDevicesOnSleep)
+            {
+                StandByDevice(_cecConfig.OnSleepStandbyDevices);
+            }
+        }
     }
 
     public void OnResumeByUser()

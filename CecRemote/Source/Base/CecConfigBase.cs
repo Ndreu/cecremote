@@ -60,6 +60,7 @@ namespace CecRemote.Base
 
     public bool SendTvPowerOff { get; set; }
     public bool SendTvPowerOffOnlyIfActiveSource { get; set; }
+    public bool RequireActiveSourceWhenSleep { get; set; }
 
     public CecConfigBase()
     {
@@ -102,6 +103,8 @@ namespace CecRemote.Base
 
       SendTvPowerOff = copyConf.SendTvPowerOff;
       SendTvPowerOffOnlyIfActiveSource = copyConf.SendTvPowerOffOnlyIfActiveSource;
+
+      RequireActiveSourceWhenSleep = copyConf.RequireActiveSourceWhenSleep;
 
       ClientVersion = copyConf.ClientVersion;
       ConnectedTo = copyConf.ConnectedTo;
@@ -156,6 +159,7 @@ namespace CecRemote.Base
 
       SendTvPowerOff = false;
       SendTvPowerOffOnlyIfActiveSource = true;
+      RequireActiveSourceWhenSleep = true;
 
     }
 
