@@ -54,6 +54,12 @@ namespace CecRemote
 
     private void AddBindings()
     {
+      // Disable checkedchanged event for volumecontrol, if it has been showed before
+        if (_config.ControlVolume)
+        {
+            checkBoxVolumeControl.CheckedChanged -= checkBoxVolumeControl_CheckedChanged;
+        }
+
       numericUpDownHdmi.DataBindings.Add("Value", _config, "HdmiPort");
       textBoxOsd.DataBindings.Add("Text", _config, "OsdName");
       checkBoxFastScrolling.DataBindings.Add("Checked", _config, "FastScrolling");
@@ -71,6 +77,7 @@ namespace CecRemote
       checkBoxSetInactiveSourceOnExit.DataBindings.Add("Checked", _config, "InactivateSourceOnExit");
       checkBoxSetActiveSourceOnResume.DataBindings.Add("Checked", _config, "ActivateSourceOnResume");
       checkBoxSetInactiveSourceOnSleep.DataBindings.Add("Checked", _config, "InactivateSourceOnSleep");
+      checkBoxVolumeControl.DataBindings.Add("Checked", _config, "ControlVolume");
 
       // Handle comboboxes separately
 
@@ -260,6 +267,15 @@ namespace CecRemote
       }
 
       pow = null;
+    }
+
+    private void checkBoxVolumeControl_CheckedChanged(object sender, EventArgs e)
+    {
+        if (checkBoxVolumeControl.Checked)
+        {
+            MessageBox.Show("Please note that checking this option will force the internal MediaPortal volume to maximum.", 
+                "Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+        }
     }
 
   }

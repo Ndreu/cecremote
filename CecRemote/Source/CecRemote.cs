@@ -21,6 +21,7 @@ using System.Runtime.InteropServices;
 using System.IO;
 using System.Xml;
 using System.Reflection;
+using System.Threading;
 using System.Windows.Forms;
 using MediaPortal.GUI.Library;
 using MediaPortal.Configuration;
@@ -56,6 +57,7 @@ namespace CecRemote
         private CecRemoteClient _client;
         private CecConfig _config;
         private bool _sleep;
+        private bool _away;
         private readonly string DefaultLanguage = "en-US";
         private readonly string Guid = "cb89aada-3b22-44e3-b5dc-f4fb02940f42";
 
@@ -144,11 +146,16 @@ namespace CecRemote
 
         public void Start()
         {
+            Log.Info("CeCRemote: Version 0.9.3");
+
           _sleep = false;
+          _away = false;
 
           PrepareClient();
 
-          _client.OnStart();
+          Thread starterThread = new Thread(new ThreadStart(_client.OnStart));
+          starterThread.Name = "CECMain";
+          starterThread.Start();
            
 
           // Try to subscribe to Extensions plugin update event.
@@ -167,6 +174,12 @@ namespace CecRemote
           catch
           {
             Log.Debug("CecRemote: Error while subscribing to extensions update event, extensions plugin probably not installed.");
+          }
+
+          if (_config.ControlVolume)
+          {
+              // Receive MP action messages
+              GUIWindowManager.OnNewAction += new OnActionHandler(GUIWindowManager_OnNewAction);
           }
 
         }
@@ -199,13 +212,21 @@ namespace CecRemote
                 switch (msg.WParam.ToInt32())
                 {
                     case PBT_APMSUSPEND:
-                        _sleep = true;
-                        
-                        Log.Info("CecRemote: PowerControl: System going to sleep, stoppping CEC-client...");
-                        
-                        if (_client != null)
+
+                        if (!_sleep)
                         {
-                          _client.OnSleep();
+                            _sleep = true;
+
+                            Log.Info("CecRemote: PowerControl: System going to sleep, stopping CEC-client...");
+
+                            if (_client != null)
+                            {
+                                _client.OnSleep();
+                            }
+                        }
+                        else
+                        {
+                            Log.Warn("CecRemote: PowerControl: Received PBT_APMSUSPEND when remote state already suspended");
                         }
 
                         break;
@@ -224,8 +245,8 @@ namespace CecRemote
                     
                         break;
                   
-                        // Handle awaymode
-                      case PBT_POWERSETTINGCHANGE:
+                      // Handle awaymode
+                     case PBT_POWERSETTINGCHANGE:
 
                         POWERBROADCAST_SETTING ps = (POWERBROADCAST_SETTING)Marshal.PtrToStructure(msg.LParam, typeof(POWERBROADCAST_SETTING));
 
@@ -233,17 +254,32 @@ namespace CecRemote
                         {
                             if (ps.Data == 0)
                             {
-                                Log.Info("CecRemote: PowerControl: System exiting away mode");
-                                HandleResume(false);
+                                if (_away && !_sleep)
+                                {
+                                    _away = false;
+                                    Log.Info("CecRemote: PowerControl: System exiting away mode");
+                                    HandleResume(false);
+                                }
+                                else
+                                {
+                                    Log.Warn("CecRemote: PowerControl: Received GUID_SYSTEM_AWAYMODE 0 and sleepmode is {0} and awaymode is {1}", _sleep.ToString(), _away.ToString());
+                                }
                             }
                             else
                             {
-                                Log.Info("CecRemote: PowerControl: System entering to away mode");
-                                _sleep = true;
-
-                                if (_client != null)
+                                if (!_away)
                                 {
-                                    _client.OnAwayMode();
+                                    _away = true;
+                                    Log.Info("CecRemote: PowerControl: System entering away mode");
+
+                                    if (_client != null)
+                                    {
+                                        _client.OnAwayMode();
+                                    }
+                                }
+                                else
+                                {
+                                    Log.Warn("CecRemote: PowerControl: Received GUID_SYSTEM_AWAYMODE 1 and awaymode is {0}", _away.ToString());
                                 }
                             }
                         }
@@ -261,25 +297,37 @@ namespace CecRemote
 
         private void HandleResume(bool automatic)
         {
-           
             if (_sleep)
             {
                 _sleep = false;
+                _away = false;
 
                 // DeInitialize when resuming to make sure client is prepared properly.
-                _client.DeInit();
-                _client = null;
+                if (_client != null)
+                {
+                    _client.DeInit();
+                    _client = null;
+                }
+            }
+
+            if (_client == null)
+            {
                 _config = null;
 
                 PrepareClient();
             }
+
             if (automatic)
             {
-                _client.OnResumeByAutomatic();
+                Thread resumeThread = new Thread(new ThreadStart(_client.OnResumeByAutomatic));
+                resumeThread.Name = "CECResA";
+                resumeThread.Start();
             }
             else
             {
-                _client.OnResumeByUser();
+                Thread resumeThread = new Thread(new ThreadStart(_client.OnResumeByUser));
+                resumeThread.Name = "CECResU";
+                resumeThread.Start();
             }
         }
 
@@ -372,5 +420,27 @@ namespace CecRemote
           }
 
         }
+
+        void GUIWindowManager_OnNewAction(MediaPortal.GUI.Library.Action action)
+        {
+          switch (action.wID)
+          {
+            case MediaPortal.GUI.Library.Action.ActionType.ACTION_VOLUME_UP:
+              _client.VolumeUp();
+              MediaPortal.Player.VolumeHandler.Instance.Volume = MediaPortal.Player.VolumeHandler.Instance.Maximum;
+              break;
+            case MediaPortal.GUI.Library.Action.ActionType.ACTION_VOLUME_DOWN:
+              _client.VolumeDown();
+              MediaPortal.Player.VolumeHandler.Instance.Volume = MediaPortal.Player.VolumeHandler.Instance.Maximum;
+              break;
+            case MediaPortal.GUI.Library.Action.ActionType.ACTION_VOLUME_MUTE:
+              _client.VolumeMute();
+              MediaPortal.Player.VolumeHandler.Instance.IsMuted = false;
+              break;
+            default:
+              break;
+          }
+        }
+
     }
 }

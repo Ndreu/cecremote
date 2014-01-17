@@ -59,6 +59,7 @@ namespace CecRemote.Base
     private CecConfigBase _cecConfig;
     private Object _connectLock = new Object();
     private bool _connected;
+    private bool _audiosystem;
 
     public CecClientBase() { }
 
@@ -203,11 +204,12 @@ namespace CecRemote.Base
       if (conn)
       {
         WriteLog("Connected succesfully to CEC-adapter on port: " + port);
+        _audiosystem = _lib.IsActiveDevice(CecLogicalAddress.AudioSystem);
 
         if (_extensiveLogging)
         {
           WriteLog("TV vendor: " + _lib.GetDeviceVendorId(CecLogicalAddress.Tv).ToString());
-          WriteLog("AVR connected: " + _lib.IsActiveDevice(CecLogicalAddress.AudioSystem).ToString() + " vendor: " 
+          WriteLog("AVR connected: " + _audiosystem.ToString() + " vendor: " 
             + _lib.GetDeviceVendorId(CecLogicalAddress.AudioSystem));
         }
       }
@@ -241,6 +243,90 @@ namespace CecRemote.Base
       return ret;
     }
 
+    public short VolumeDown(bool release = true)
+    {
+      
+      if (_audiosystem)
+      {
+        return _lib.VolumeDown(release);
+      }
+      
+      _lib.SendKeypress(CecLogicalAddress.Tv, CecUserControlCode.VolumeDown, false);
+      _lib.SendKeyRelease(CecLogicalAddress.Tv, false);
+
+      return 0;
+    }
+
+    public short VolumeUp(bool release = true)
+    {
+
+      if (_audiosystem)
+      {
+        return _lib.VolumeUp(release);
+      }
+      
+      _lib.SendKeypress(CecLogicalAddress.Tv, CecUserControlCode.VolumeUp, false);
+      _lib.SendKeyRelease(CecLogicalAddress.Tv, false);
+
+      return 0;
+    }
+
+    public short VolumeMute(bool release = true)
+    {
+
+      if (_audiosystem)
+      {
+          return _lib.MuteAudio(release);
+      }
+      
+      _lib.SendKeypress(CecLogicalAddress.Tv, CecUserControlCode.Mute, false);
+      _lib.SendKeyRelease(CecLogicalAddress.Tv, false);
+
+      return 0;
+    }
+
+    public string GetVendor(CecLogicalAddress device)
+    {
+      return _lib.GetDeviceVendorId(device).ToString();
+    }
+
+    public string GetOsdName(CecLogicalAddress device)
+    {
+      return _lib.GetDeviceOSDName(device).ToString();
+    }
+
+    public string GetPowerStatus(CecLogicalAddress device)
+    {
+      return _lib.GetDevicePowerStatus(device).ToString();
+    }
+
+    public List<string> GetActiveDevices()
+    {
+      _lib.RescanActiveDevices();
+
+      List<string> devices = new List<string>();
+
+      CecLogicalAddresses addresses = _lib.GetActiveDevices();
+      for (int i = 0; i < addresses.Addresses.Length; i++)
+      {
+        CecLogicalAddress address = (CecLogicalAddress)i;
+        if (!addresses.IsSet(address))
+        { continue; }
+
+        string device = String.Empty;
+
+        device += _lib.ToString(_lib.GetDeviceVendorId(address)) + ',';
+        device += _lib.GetDeviceOSDName(address) + ',';
+        device += _lib.ToString(_lib.GetDevicePowerStatus(address)) + ',';
+        device += _lib.IsActiveDevice(address).ToString() + ',';
+        device += _lib.GetDevicePhysicalAddress(address).ToString();
+
+        devices.Add(device);
+
+      }
+
+      return devices;
+    }
 
     /// <summary>
     /// Send "Power ON" -signal to device.
@@ -310,7 +396,7 @@ namespace CecRemote.Base
 
 
 
-    public bool OnStart()
+    public void OnStart()
     {
      
       lock (_connectLock)
@@ -324,7 +410,7 @@ namespace CecRemote.Base
         // 10000 is default timeout to wait connection to open.
         if (!Connect(10000))
         {
-          return false;
+          return;
         }
         else
         {
@@ -345,7 +431,7 @@ namespace CecRemote.Base
         _wakeUpByAutoEvent = false;
       }
 
-      return true;
+      return;
 
     }
 
@@ -621,6 +707,8 @@ namespace CecRemote.Base
         DateTime current = DateTime.Now;
         TimeSpan temp = current.Subtract(_keyTimeStamp);
 
+        _keyTimeStamp = current;
+
         if (temp.TotalMilliseconds < _cecConfig.DelayBetweenKeys)
         {
           if (_extensiveLogging)
@@ -631,8 +719,6 @@ namespace CecRemote.Base
             return 1;
           }
         }
-
-        _keyTimeStamp = current;
       }
 
       if (_fastScrolling)
@@ -646,14 +732,23 @@ namespace CecRemote.Base
 
             if (_extensiveLogging)
             {
-              WriteLog("FastScrolling enabled, starting button repeat with repeat rate: " + _cecConfig.FastScrollingRepeatRate.ToString());
+              WriteLog("FastScrolling enabled, button repeat rate: " + _cecConfig.FastScrollingRepeatRate.ToString());
             }
 
             return 1;
           }
           else
           {
+            if (_keyCount != 0)
+            {
+                _currentButton = key;
+                _keyCount++;
+
+                return 1;
+            }
+            
             _keyCount++;
+            
           }
         }
         else
