@@ -68,6 +68,8 @@ namespace CecRemote
           SendTvPowerOffOnlyIfActiveSource = reader.GetValueAsBool("CecRemote", "SendTvPowerOffOnlyIfActiveSource", base.SendTvPowerOffOnlyIfActiveSource);
           RequireActiveSourceWhenSleep = reader.GetValueAsBool("CecRemote", "RequireActiveSourceWhenSleep", base.RequireActiveSourceWhenSleep);
           ControlVolume = reader.GetValueAsBool("CecRemote", "ControlVolume", base.ControlVolume);
+          ForcePhysicalAddress = reader.GetValueAsBool("CecRemote", "ForcePhysicalAddress", base.ForcePhysicalAddress);
+          PhysicalAddress = reader.GetValueAsString("CecRemote", "PhysicalAddress", base.PhysicalAddress);
 
         }
       }
@@ -113,6 +115,8 @@ namespace CecRemote
             writer.SetValueAsBool("CecRemote", "SendTvPowerOffOnlyIfActiveSource", base.SendTvPowerOffOnlyIfActiveSource);
             writer.SetValueAsBool("CecRemote", "RequireActiveSourceWhenSleep", base.RequireActiveSourceWhenSleep);
             writer.SetValueAsBool("CecRemote", "ControlVolume", base.ControlVolume);
+            writer.SetValueAsBool("CecRemote", "ForcePhysicalAddress", base.ForcePhysicalAddress);
+            writer.SetValue("CecRemote", "PhysicalAddress", base.PhysicalAddress);
           }
       }
       catch (Exception ex)

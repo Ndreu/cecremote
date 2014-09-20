@@ -1,5 +1,11 @@
 CECREMOTE - Changelog
 
+0.9.5
+
+*+ Add option to force physical address
+
+*+ Experimental support for reconnecting the adapter if preparing for sleep failed.
+
 0.9.4
 
 *fix Info button looping fix for some Philips TVs
@@ -8,9 +14,9 @@ CECREMOTE - Changelog
 
 0.9.3
 
-+* Improved away mode support
-+* Stability improvements (for sleep/resume)
-+* Support for using Media Portal volume controls to change AVR volume
+*+ Improved away mode support
+*+ Stability improvements (for sleep/resume)
+*+ Support for using Media Portal volume controls to change AVR volume
 
 *change Libcec version update 2.1.3
 

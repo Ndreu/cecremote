@@ -78,6 +78,8 @@ namespace CecRemote
       checkBoxSetActiveSourceOnResume.DataBindings.Add("Checked", _config, "ActivateSourceOnResume");
       checkBoxSetInactiveSourceOnSleep.DataBindings.Add("Checked", _config, "InactivateSourceOnSleep");
       checkBoxVolumeControl.DataBindings.Add("Checked", _config, "ControlVolume");
+      checkBoxPhysicalAddress.DataBindings.Add("Checked", _config, "ForcePhysicalAddress");
+      maskedTextBoxPhysicalAddress.DataBindings.Add("Text", _config, "PhysicalAddress");
 
       // Handle comboboxes separately
 
@@ -97,10 +99,9 @@ namespace CecRemote
           ResetBindings(c);
         }
 
-        if (c is TextBox || c is NumericUpDown || c is CheckBox || c is TrackBar)
+        if (c is TextBox || c is NumericUpDown || c is CheckBox || c is TrackBar || c is MaskedTextBox)
         {
           c.DataBindings.Clear();
-         // c.ResetText();
         }
       }
     }
@@ -275,6 +276,20 @@ namespace CecRemote
         {
             MessageBox.Show("Please note that checking this option will force the internal MediaPortal volume to maximum.", 
                 "Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+        }
+    }
+
+    private void checkBoxPhysicalAddress_CheckedChanged(object sender, EventArgs e)
+    {
+        if (checkBoxPhysicalAddress.Checked)
+        {
+            numericUpDownHdmi.Enabled = false;
+            maskedTextBoxPhysicalAddress.Enabled = true;
+        }
+        else
+        {
+            numericUpDownHdmi.Enabled = true;
+            maskedTextBoxPhysicalAddress.Enabled = false;
         }
     }
 

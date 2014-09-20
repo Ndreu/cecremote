@@ -21,7 +21,7 @@ using MediaPortal.Common.Utils;
 
 // MediaPortal compatibility information
 
-[assembly: CompatibleVersion("1.1.6.27644")]
+[assembly: CompatibleVersion("1.6.0.0")]
 [assembly: UsesSubsystem("MP.Input")]
 [assembly: UsesSubsystem("MP.Config")]
 
@@ -56,5 +56,5 @@ using MediaPortal.Common.Utils;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.9.3.0")]
-[assembly: AssemblyFileVersion("0.9.3.0")]
+[assembly: AssemblyVersion("0.9.5.0")]
+[assembly: AssemblyFileVersion("0.9.5.0")]

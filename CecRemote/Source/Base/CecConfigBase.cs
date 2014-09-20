@@ -63,6 +63,8 @@ namespace CecRemote.Base
     public bool RequireActiveSourceWhenSleep { get; set; }
 
     public bool ControlVolume { get; set; }
+    public bool ForcePhysicalAddress { get; set; }
+    public string PhysicalAddress { get; set; }
 
     public CecConfigBase()
     {
@@ -112,6 +114,8 @@ namespace CecRemote.Base
       ConnectedTo = copyConf.ConnectedTo;
 
       ControlVolume = copyConf.ControlVolume;
+      ForcePhysicalAddress = copyConf.ForcePhysicalAddress;
+      PhysicalAddress = copyConf.PhysicalAddress;
       
     }
 
@@ -165,6 +169,8 @@ namespace CecRemote.Base
       RequireActiveSourceWhenSleep = true;
 
       ControlVolume = false;
+      ForcePhysicalAddress = false;
+      PhysicalAddress = "1000";
 
     }
 

@@ -105,7 +105,7 @@ namespace CecRemote
         {
           // WindowID of windowplugin belonging to this setup
           // enter your own unique code
-          return 50001;
+          return -1;
         }
 
         // Indicates if plugin is enabled by default;
@@ -146,7 +146,7 @@ namespace CecRemote
 
         public void Start()
         {
-            Log.Info("CeCRemote: Version 0.9.3");
+            Log.Info("CeCRemote: Version 0.9.5");
 
           _sleep = false;
           _away = false;
@@ -181,6 +181,9 @@ namespace CecRemote
               // Receive MP action messages
               GUIWindowManager.OnNewAction += new OnActionHandler(GUIWindowManager_OnNewAction);
           }
+
+          // Receive MP window messages
+          //GUIWindowManager.Receivers += new SendMessageHandler(GUIWindowManager_OnReceive);
 
         }
 
@@ -441,6 +444,53 @@ namespace CecRemote
               break;
           }
         }
+        /*
+        //React to MediaPortal messages
+        private void GUIWindowManager_OnReceive(GUIMessage message)
+        {
+            if (message.Message == GUIMessage.MessageType.GUI_MSG_USER && message.TargetWindowId == this.GetWindowId())
+            {
+                if (_client == null)
+                {
+                    return;
+                }
 
+                switch (message.Param1)
+                {
+                    case 1:
+                        _client.WakeDevice((CecSharp.CecLogicalAddress)message.Param2);
+                        break;
+                    case 2:
+                        _client.StandByDevice((CecSharp.CecLogicalAddress)message.Param2);
+                        break;
+                    case 3:
+                        // Standby all devices
+                        break;
+                    case 4:
+                        // Activate source
+                        _client.SetSource(true);
+                        break;
+                    case 5:
+                        // Inactivate source
+                        _client.SetSource(false);
+                        break;
+                    case 10:
+                        _client.VolumeUp();
+                        break;
+                    case 11:
+                        _client.VolumeDown();
+                        break;
+                    case 12:
+                        _client.VolumeMute();
+                        break;
+
+                    default:
+                        break;
+
+                }
+
+            }
+        }
+        */
     }
 }

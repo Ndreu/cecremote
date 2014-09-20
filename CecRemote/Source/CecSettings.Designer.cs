@@ -48,6 +48,9 @@ namespace CecRemote
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.checkBoxPhysicalAddress = new System.Windows.Forms.CheckBox();
+            this.maskedTextBoxPhysicalAddress = new System.Windows.Forms.MaskedTextBox();
+            this.labelPhysicalAddress = new System.Windows.Forms.Label();
             this.comboBoxConnectedTo = new System.Windows.Forms.ComboBox();
             this.labelConnectedTo = new System.Windows.Forms.Label();
             this.textBoxOsd = new System.Windows.Forms.TextBox();
@@ -142,6 +145,9 @@ namespace CecRemote
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.checkBoxPhysicalAddress);
+            this.groupBox3.Controls.Add(this.maskedTextBoxPhysicalAddress);
+            this.groupBox3.Controls.Add(this.labelPhysicalAddress);
             this.groupBox3.Controls.Add(this.comboBoxConnectedTo);
             this.groupBox3.Controls.Add(this.labelConnectedTo);
             this.groupBox3.Controls.Add(this.textBoxOsd);
@@ -158,6 +164,39 @@ namespace CecRemote
             this.groupBox3.Size = new System.Drawing.Size(389, 115);
             this.groupBox3.TabIndex = 3;
             this.groupBox3.TabStop = false;
+            // 
+            // checkBoxPhysicalAddress
+            // 
+            this.checkBoxPhysicalAddress.AutoSize = true;
+            this.checkBoxPhysicalAddress.Location = new System.Drawing.Point(292, 21);
+            this.checkBoxPhysicalAddress.Name = "checkBoxPhysicalAddress";
+            this.checkBoxPhysicalAddress.Size = new System.Drawing.Size(15, 14);
+            this.checkBoxPhysicalAddress.TabIndex = 14;
+            this.checkBoxPhysicalAddress.UseVisualStyleBackColor = true;
+            this.checkBoxPhysicalAddress.CheckedChanged += new System.EventHandler(this.checkBoxPhysicalAddress_CheckedChanged);
+            // 
+            // maskedTextBoxPhysicalAddress
+            // 
+            this.maskedTextBoxPhysicalAddress.Enabled = false;
+            this.maskedTextBoxPhysicalAddress.Location = new System.Drawing.Point(326, 17);
+            this.maskedTextBoxPhysicalAddress.Mask = "0.0.0.0";
+            this.maskedTextBoxPhysicalAddress.Name = "maskedTextBoxPhysicalAddress";
+            this.maskedTextBoxPhysicalAddress.Size = new System.Drawing.Size(57, 20);
+            this.maskedTextBoxPhysicalAddress.TabIndex = 13;
+            this.maskedTextBoxPhysicalAddress.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.maskedTextBoxPhysicalAddress.TextMaskFormat = System.Windows.Forms.MaskFormat.ExcludePromptAndLiterals;
+            // 
+            // labelPhysicalAddress
+            // 
+            this.labelPhysicalAddress.AutoSize = true;
+            this.labelPhysicalAddress.Location = new System.Drawing.Point(187, 22);
+            this.labelPhysicalAddress.Name = "labelPhysicalAddress";
+            this.labelPhysicalAddress.Size = new System.Drawing.Size(89, 13);
+            this.labelPhysicalAddress.TabIndex = 12;
+            this.labelPhysicalAddress.Text = "Physical address:";
+            this.toolTip1.SetToolTip(this.labelPhysicalAddress, "If overriding the physical address of the\r\ndevice where the adapter is connected " +
+        "is needed,\r\nenable this option and enter the address in\r\nform: x.x.x.x (1.0.0.0 " +
+        "for TV etc.).");
             // 
             // comboBoxConnectedTo
             // 
@@ -205,7 +244,7 @@ namespace CecRemote
             // labelSetMapping
             // 
             this.labelSetMapping.AutoSize = true;
-            this.labelSetMapping.Location = new System.Drawing.Point(187, 54);
+            this.labelSetMapping.Location = new System.Drawing.Point(187, 88);
             this.labelSetMapping.Name = "labelSetMapping";
             this.labelSetMapping.Size = new System.Drawing.Size(84, 13);
             this.labelSetMapping.TabIndex = 7;
@@ -213,7 +252,7 @@ namespace CecRemote
             // 
             // buttonMapping
             // 
-            this.buttonMapping.Location = new System.Drawing.Point(277, 51);
+            this.buttonMapping.Location = new System.Drawing.Point(277, 85);
             this.buttonMapping.Name = "buttonMapping";
             this.buttonMapping.Size = new System.Drawing.Size(106, 23);
             this.buttonMapping.TabIndex = 6;
@@ -249,7 +288,7 @@ namespace CecRemote
             "PlaybackDevice",
             "Tuner",
             "AudioSystem"});
-            this.comboBoxDeviceType.Location = new System.Drawing.Point(277, 18);
+            this.comboBoxDeviceType.Location = new System.Drawing.Point(277, 52);
             this.comboBoxDeviceType.Name = "comboBoxDeviceType";
             this.comboBoxDeviceType.Size = new System.Drawing.Size(106, 21);
             this.comboBoxDeviceType.TabIndex = 4;
@@ -258,7 +297,7 @@ namespace CecRemote
             // labelSetDeviceType
             // 
             this.labelSetDeviceType.AutoSize = true;
-            this.labelSetDeviceType.Location = new System.Drawing.Point(187, 22);
+            this.labelSetDeviceType.Location = new System.Drawing.Point(187, 56);
             this.labelSetDeviceType.Name = "labelSetDeviceType";
             this.labelSetDeviceType.Size = new System.Drawing.Size(67, 13);
             this.labelSetDeviceType.TabIndex = 3;
@@ -845,6 +884,9 @@ namespace CecRemote
         private System.Windows.Forms.Button buttonAdvancedPower;
         private System.Windows.Forms.CheckBox checkBoxStandbyOnExit;
         private System.Windows.Forms.CheckBox checkBoxVolumeControl;
+        private System.Windows.Forms.CheckBox checkBoxPhysicalAddress;
+        private System.Windows.Forms.MaskedTextBox maskedTextBoxPhysicalAddress;
+        private System.Windows.Forms.Label labelPhysicalAddress;
     }
     
    

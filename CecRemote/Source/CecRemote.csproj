@@ -10,8 +10,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CecRemote</RootNamespace>
     <AssemblyName>CecRemote</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -63,10 +64,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\Core.dll</HintPath>
     </Reference>
-    <Reference Include="Dialogs">
-      <HintPath>.\Dialogs.dll</HintPath>
-    </Reference>
-    <Reference Include="LibCecSharp, Version=2.0.2.0, Culture=neutral, processorArchitecture=x86">
+    <Reference Include="LibCecSharp, Version=2.1.1.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\LibCecSharp.dll</HintPath>
     </Reference>
@@ -141,7 +139,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /Y $(TargetDir)$(TargetFileName) \\MEDIACENTER\Program Files (x86)\Team MediaPortal\MediaPortal\plugins\process\</PostBuildEvent>
+    <PostBuildEvent>copy /Y $(TargetDir)$(TargetFileName) \\MEDIACENTER\"Program Files (x86)"\"Team MediaPortal"\MediaPortal\plugins\process\</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

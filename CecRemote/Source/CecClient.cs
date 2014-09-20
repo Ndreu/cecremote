@@ -37,6 +37,14 @@ namespace CecRemote
 
     }
 
+    public override void OnStart()
+    {
+        base.OnStart();
+
+        GUIPropertyManager.SetProperty("#CecRemote.TV.Vendor", GetVendor(CecSharp.CecLogicalAddress.Tv));
+        GUIPropertyManager.SetProperty("#CecRemote.AVR.Vendor", GetVendor(CecSharp.CecLogicalAddress.AudioSystem));
+    }
+
     public override void DeInit()
     {
       base.DeInit();
@@ -45,17 +53,33 @@ namespace CecRemote
 
     protected override void KeyPress(int keycode)
     {
-      if (!_remoteHandler.MapAction(keycode))
-      {
-        Log.Info("CecRemote: Received unmapped button with code: " + keycode.ToString());
-      }
+        if (GUIGraphicsContext.form.InvokeRequired)
+        {
+            InvokeButtonDelegate d = new InvokeButtonDelegate(InvokeButton);
+            GUIGraphicsContext.form.Invoke(d, new object[] { keycode });
+        }
+        else
+        {
+            InvokeButton(keycode);
+        }
 
     }
 
     protected override void WriteLog(string message)
     {
         Log.Debug("CecRemote: " + message);
-    } 
+    }
+
+    protected delegate void InvokeButtonDelegate(int button);
+
+    protected void InvokeButton(int button)
+    {
+        if (!_remoteHandler.MapAction((int)button))
+        {
+            Log.Info("CecRemote: Received unmapped button with code: " + button.ToString());
+        }
+    }
+
   }
 
 }

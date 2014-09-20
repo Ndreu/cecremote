@@ -146,7 +146,13 @@ namespace CecRemote.Base
         _libConfig.ActivateSource = false;  // Control this manually based on settings.
         _libConfig.HDMIPort = (byte)_cecConfig.HdmiPort;
         _libConfig.BaseDevice = _cecConfig.ConnectedTo;
-        _libConfig.AutodetectAddress = true;
+
+        if (_cecConfig.ForcePhysicalAddress)
+        {
+            WriteLog("Physical address overriding enabled, ignoring HDMI port an using address: " + _cecConfig.PhysicalAddress);
+
+            _libConfig.PhysicalAddress = ushort.Parse(_cecConfig.PhysicalAddress, System.Globalization.NumberStyles.AllowHexSpecifier);
+        }
 
         WriteLog("Configuration loaded succesfully.");
 
@@ -396,7 +402,7 @@ namespace CecRemote.Base
 
 
 
-    public void OnStart()
+    public virtual void OnStart()
     {
      
       lock (_connectLock)
@@ -410,6 +416,7 @@ namespace CecRemote.Base
         // 10000 is default timeout to wait connection to open.
         if (!Connect(10000))
         {
+           _connected = false;
           return;
         }
         else
@@ -739,13 +746,6 @@ namespace CecRemote.Base
           }
           else
           {
-            if (_keyCount != 0)
-            {
-                _currentButton = key;
-                _keyCount++;
-
-                return 1;
-            }
             
             _keyCount++;
             
@@ -794,6 +794,28 @@ namespace CecRemote.Base
     public override int ReceiveAlert(CecAlert alert, CecParameter data)
     {
       WriteLog("Received libcec Alert: " + alert.ToString());
+
+      if (alert == CecAlert.ConnectionLost)
+      {
+          WriteLog("Cecremote: RECONNECT");
+          
+          short retries = 1;
+          bool reconn = false;
+
+          DeInit();
+
+          while (retries < 4 && !reconn)
+          {
+              OnStart();
+              reconn = _connected;
+
+              WriteLog("Reconnection attempt " + retries.ToString() + " ... connected: " + reconn.ToString());
+              
+              retries++;
+          }
+          
+      }
+      
       return 1;
     }
 
