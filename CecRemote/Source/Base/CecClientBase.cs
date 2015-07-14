@@ -139,7 +139,7 @@ namespace CecRemote.Base
         
         _libConfig.DeviceTypes.Types[0] = _cecConfig.DeviceType;
         _libConfig.DeviceName = _cecConfig.OsdName;
-        _libConfig.ClientVersion = _cecConfig.ClientVersion;
+        _libConfig.ClientVersion = LibCECConfiguration.CurrentVersion;
         _libConfig.WakeDevices.Clear();
         _libConfig.PowerOffDevices.Clear();
         _libConfig.PhysicalAddress = 0;

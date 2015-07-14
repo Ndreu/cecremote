@@ -56,7 +56,7 @@ namespace CecRemote.Base
     public CecLogicalAddresses OnSleepStandbyDevices { get; set; }
        
     public CecLogicalAddress ConnectedTo { get; set; }
-    public CecClientVersion ClientVersion { get; set; }
+    public UInt32 ClientVersion { get; set; }
 
     public bool SendTvPowerOff { get; set; }
     public bool SendTvPowerOffOnlyIfActiveSource { get; set; }
@@ -161,7 +161,7 @@ namespace CecRemote.Base
       OnSleepStandbyDevices.Set(CecLogicalAddress.Tv);
       OnSleepStandbyDevices.Set(CecLogicalAddress.AudioSystem);
 
-      ClientVersion = CecClientVersion.Version2_1_1;
+      ClientVersion = LibCECConfiguration.CurrentVersion;
       ConnectedTo = CecLogicalAddress.Tv;
 
       SendTvPowerOff = false;

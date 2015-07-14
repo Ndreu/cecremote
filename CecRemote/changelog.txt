@@ -1,5 +1,9 @@
 CECREMOTE - Changelog
 
+0.9.6
+
+*change Libcec version update 3.0.0
+
 0.9.5
 
 *+ Add option to force physical address
